@@ -12,7 +12,8 @@
 				catch (e) { alert("failed to parse network defintion."); }
 				try { init_obj = JSON.parse(document.getElementById("initial_input").value); }
 				catch (e) { alert("failed to parse initial values."); }
-				calcVectTable(init_obj, net_obj,10);
+				var table = calcVectTable(init_obj, net_obj,20);
+				document.getElementById("output_div").innerHTML = vectTableToHTML(table);
 			}
 		</script>
 	</head>
@@ -25,11 +26,12 @@
 					<td><textarea id="network_input">
 			[
 				{"name": "h_out", "input": ["heat"], "output": [], "rate": 0.05},
+				{"name": "burn", "input": ["wood"], "output": ["heat"], "rate": 0.05},
 				{"name": "h_in", "input": [], "output": ["heat"], "rate": 0.5}
 			]
 				</textarea></td></tr>
 				<tr><td>Enter initial settings:</td>
-				<td><textarea id="initial_input"> {"heat":50.0} </textarea>
+				<td><textarea id="initial_input"> {"heat":50.0, "wood":50} </textarea>
 				</td></tr>
 	</table>
 			<button onclick="load_network_def();">Start</button>

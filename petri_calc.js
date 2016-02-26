@@ -18,7 +18,7 @@ function calcStepSize(key, current_vect, net_obj) {
 		in_count = net_obj[i].input.filter(function(x) {return x == key}).length;
 		if (out_count == in_count) { pop_prod = 0.0; }
 		else if (net_obj[i].input.length > 0) {
-			pop_prod = assoc_fold(net_obj[i].input.map(function(x) { return current_vect[x];}), function(x,y) {return x*y;});
+			pop_prod = assoc_fold(net_obj[i].input.map(function(x) { return current_vect[x] || 0;}), function(x,y) {return x*y;});
 		}
 		else {
 			pop_prod = 1.0;
@@ -38,10 +38,30 @@ function calcAllNext(current_vect, net_obj) {
 	return output;
 }
 
+function sumStrings(array) {
+	return assoc_fold(array, function (x,y) { return x+y; });
+}
+
+function vectTableToHTML(table){
+	var header = [];
+	var output = "<table>";
+	if (!table || table.length < 1) { return "<i>empty table</i>"; }
+	for (var key in table[0]) { header.push(key); }
+
+	output += "<tr>" + sumStrings( header.map(function(col) {return "<th>" + col + "</th>";})) + "</tr>\n";
+	output += sumStrings(table.map(function(row) {
+		return "<tr>" + sumStrings(header.map(function(col) {
+			return "<td>" + (row[col].toFixed(2)) + "</td>";
+		})) + "</tr>\n"
+	}));
+
+	return output + "</table>\n";
+}
+
 function calcVectTable(init_vect, net_obj, steps) {
 	var output = [];
 	var current = init_vect;
-	for (var i = 0; i < steps.length; i++) {
+	for (var i = 0; i < steps; i++) {
 		output.push(current);
 		current = calcAllNext(current, net_obj);
 	}
