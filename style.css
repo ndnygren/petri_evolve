@@ -1,18 +1,24 @@
+html {
+	background-color: saddlebrown;
+}
 
 body {
+	background-color: whitesmoke;
 	margin-left:20px;
 	margin-right:20px;
 	border: 1px dotted black;
-	padding: 2px;
+	padding: 20px;
 }
 
 div {
+	background-color: blanchedalmond;
 	border: 1px dotted black;
 	padding: 2px;
 	margin-bottom: 2px;
 }
 
 canvas {
+	background-color: white;
 	border: 1px dotted black;
 	padding: 2px;
 	margin-bottom: 2px;

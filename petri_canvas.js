@@ -13,7 +13,19 @@ function canvasWriter(canvas) {
 	this.last_cursors = [];
 
 	this.reset = function() {
+		this.last_cursors = [];
 		this.canvas.getContext('2d').clearRect(0, 0, this.canvas.width, this.canvas.height);
+	}
+
+	this.drawCurves = function (table, colors) {
+		for (color in colors){
+			this.addCursor(color, table[0][color] || 0, colors[color]);
+		}
+		for (x in table) {
+			for (color in colors){
+				this.drawFromCursor(color, table[x][color] || 0);
+			}
+		}
 	}
 
 	this.setSizeBasedOnDataSet = function(list) {
