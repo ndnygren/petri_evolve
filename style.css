@@ -24,3 +24,8 @@ canvas {
 	margin-bottom: 2px;
 }
 
+textarea {
+	width: 550px;
+	height: 80px;
+}
+

@@ -68,3 +68,21 @@ function calcVectTable(init_vect, net_obj, steps) {
 	return output;
 }
 
+function petriEvolve(init_vect, net_obj, crit_obj) {
+	this.init_vect = init_vect;
+	this.net_obj = net_obj;
+	this.crit_obj = crit_obj;
+
+	this.evalTable = function(table) {
+		var error = 0;
+		var diff;
+
+		for (x in this.crit_obj) {
+			diff = table[this.crit_obj[x].time][this.crit_obj[x].state] - this.crit_obj[x].quant;
+			error += (diff*diff);
+		}
+
+		return error;
+	}
+}
+

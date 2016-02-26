@@ -60,6 +60,22 @@ function canvasWriter(canvas) {
 		}
 	}
 
+	this.drawTarget = function(time, quant) {
+		this.drawCircle(this.scaleX(time), this.scaleY(quant), 3, "blue");
+	}
+
+	this.drawCircle = function(x,y,r,color) {
+		var context = this.canvas.getContext('2d');
+
+		context.beginPath();
+		context.arc(x, y, r, 0, 2 * Math.PI, false);
+		context.fillStyle = color;
+		context.fill();
+		context.lineWidth = 1;
+		context.strokeStyle = '#000000';
+		context.stroke();
+	}
+
 	this.drawLine = function(x1,y1,x2,y2,color,width) {
 		var context = this.canvas.getContext('2d');
 
