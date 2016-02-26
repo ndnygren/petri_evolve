@@ -30,12 +30,17 @@
 				var cw_current = new canvasWriter(document.getElementById("current_canvas"));
 				var cw_best = new canvasWriter(document.getElementById("best_canvas"));
 				load_network_def();
-				var table = calcVectTable(init_obj, net_obj,150);
 				var ev = new petriEvolve(init_obj, net_obj, crit_obj);
-				cw_current.setSizeBasedOnDataSet(table);
+				var ls = ev.makeLambdaSet(10).concat([net_obj]);
+				var table = ev.calcTable(net_obj);
+				var old_best = ev.evalTable(table);
+				var table_c = ev.calcTable(ev.bestInSet(ls));
+
+				cw_current.setSizeBasedOnDataSet(table_c);
 				cw_current.reset();
 				cw_current.drawAxis();
-				cw_current.drawCurves(table, color_obj);
+				cw_current.drawCurves(table_c, color_obj);
+
 				cw_best.setSizeBasedOnDataSet(table);
 				cw_best.reset();
 				cw_best.drawAxis();
@@ -44,7 +49,9 @@
 					cw_current.drawTarget(crit_obj[x].time, crit_obj[x].quant);
 					cw_best.drawTarget(crit_obj[x].time, crit_obj[x].quant);
 				}
-				document.getElementById("output_div").innerHTML = "best: " + ev.evalTable(table);
+				document.getElementById("output_div").innerHTML
+					= ", current: " + ev.evalTable(table_c)
+					+ ", orig: " + old_best;
 			}
 		</script>
 	</head>
@@ -82,8 +89,13 @@
 			<button onclick="start_network_evolve();">Start</button>
 		</div>
 		<div id="evolve_div">
-			<canvas width=400 height=300 id="current_canvas"></canvas>
-			<canvas width=400 height=300 id="best_canvas"></canvas>
+			<table>
+				<tr><th>current</th><th>best</th></tr>
+				<tr>
+					<td><canvas width=400 height=300 id="current_canvas"></canvas></td>
+					<td><canvas width=400 height=300 id="best_canvas"></canvas></td>
+				</tr>
+			</table>
 		</div>
 		<div id="output_div"></div>
 	</body>

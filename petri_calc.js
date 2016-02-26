@@ -72,17 +72,76 @@ function petriEvolve(init_vect, net_obj, crit_obj) {
 	this.init_vect = init_vect;
 	this.net_obj = net_obj;
 	this.crit_obj = crit_obj;
+	this.best_net = net_obj;
+
+	this.calcTable = function(net) {
+		var steps = 0;
+		for (var x in this.crit_obj) {
+			steps = Math.max(steps, this.crit_obj[x].time);
+		}
+
+		return calcVectTable(this.init_vect, net, steps+5);
+	}
+
+	this.bestTable = function() {
+		return this.calcTable(this.best_net);
+	}
 
 	this.evalTable = function(table) {
 		var error = 0;
 		var diff;
-
-		for (x in this.crit_obj) {
+		for (var x in this.crit_obj) {
 			diff = table[this.crit_obj[x].time][this.crit_obj[x].state] - this.crit_obj[x].quant;
 			error += (diff*diff);
 		}
 
 		return error;
+	}
+
+	this.copyTransition = function(t) {
+		var output = {};
+		for (var x in t) {
+			output[x] = t[x];
+		}
+		return output;
+	}
+
+	this.mutateNetRates = function(net_obj) {
+		var freq = 0.3;
+		var intensity = 0.5;
+		var output = [];
+		var temp;
+
+		for (var x in net_obj) {
+			temp = this.copyTransition(net_obj[x]);
+			if (Math.random() < freq) {
+				temp.rate *= 1 + ((Math.random() - 0.5) * intensity);
+			}
+			output.push(temp);
+		}
+
+		return output;
+	}
+
+	this.bestInSet = function(list) {
+		var b_so_far = this.evalTable(this.bestTable());
+		var next;
+		for (var x in list) {
+			next = this.evalTable(this.calcTable(list[x]));
+			if (next < b_so_far) {
+				b_so_far = next;
+				this.best_net = list[x];
+			}
+		}
+		return this.best_net;
+	}
+
+	this.makeLambdaSet = function(lambda) {
+		var output = [];
+		for (var i = 0; i < lambda; i++) {
+			output.push(this.mutateNetRates(this.best_net));
+		}
+		return output;
 	}
 }
 
