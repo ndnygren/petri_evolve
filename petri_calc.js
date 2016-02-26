@@ -73,6 +73,7 @@ function petriEvolve(init_vect, net_obj, crit_obj) {
 	this.net_obj = net_obj;
 	this.crit_obj = crit_obj;
 	this.best_net = net_obj;
+	this.ls;
 
 	this.calcTable = function(net) {
 		var steps = 0;
@@ -141,6 +142,8 @@ function petriEvolve(init_vect, net_obj, crit_obj) {
 		for (var i = 0; i < lambda; i++) {
 			output.push(this.mutateNetRates(this.best_net));
 		}
+		output.push(this.best_net);
+		this.ls = output;
 		return output;
 	}
 }

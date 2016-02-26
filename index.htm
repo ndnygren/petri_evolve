@@ -19,39 +19,45 @@
 				document.getElementById("output_div").innerHTML = vectTableToHTML(table);
 				var cw = new canvasWriter(document.getElementById("chart_canvas"));
 				cw.setSizeBasedOnDataSet(table);
-				cw.reset();
-				cw.drawAxis();
 				cw.drawCurves(table, color_obj);
 			}
 
+			function slowAsyncLoop(cw_c, cw_b, ev, frame, lambda, gens) {
+				if (frame % lambda == 0) {
+					var table = ev.calcTable(ev.bestInSet(ev.ls));
+					ev.makeLambdaSet(lambda);
+					cw_b.setSizeBasedOnDataSet(table);
+					cw_b.drawCurves(table, color_obj);
+				}
+				var table_c = ev.calcTable(ev.ls[frame % lambda]);
+				cw_c.setSizeBasedOnDataSet(table_c);
+				cw_c.drawCurves(table_c, color_obj);
+				for (x in crit_obj) {
+					cw_c.drawTarget(crit_obj[x].time, crit_obj[x].quant);
+					//cw_best.drawTarget(crit_obj[x].time, crit_obj[x].quant);
+				}
+
+				document.getElementById("output_div").innerHTML
+					+= "</br>frame " + frame
+					+ ", current: " + ev.evalTable(table_c)
+					+ ", orig: " + ev.evalTable(ev.calcTable(ev.best_net));
+
+				if (frame < lambda * gens) {
+					setTimeout(function () {
+							slowAsyncLoop(cw_c, cw_b, ev, frame+1, lambda, gens);
+					}, 1);
+
+				}
+			}
+
 			function start_network_evolve() {
+				load_network_def();
 				try { crit_obj = JSON.parse(document.getElementById("crit_input").value); }
 				catch (e) { alert("failed to parse criteria values."); }
 				var cw_current = new canvasWriter(document.getElementById("current_canvas"));
 				var cw_best = new canvasWriter(document.getElementById("best_canvas"));
-				load_network_def();
 				var ev = new petriEvolve(init_obj, net_obj, crit_obj);
-				var ls = ev.makeLambdaSet(10).concat([net_obj]);
-				var table = ev.calcTable(net_obj);
-				var old_best = ev.evalTable(table);
-				var table_c = ev.calcTable(ev.bestInSet(ls));
-
-				cw_current.setSizeBasedOnDataSet(table_c);
-				cw_current.reset();
-				cw_current.drawAxis();
-				cw_current.drawCurves(table_c, color_obj);
-
-				cw_best.setSizeBasedOnDataSet(table);
-				cw_best.reset();
-				cw_best.drawAxis();
-				cw_best.drawCurves(table, color_obj);
-				for (x in crit_obj) {
-					cw_current.drawTarget(crit_obj[x].time, crit_obj[x].quant);
-					cw_best.drawTarget(crit_obj[x].time, crit_obj[x].quant);
-				}
-				document.getElementById("output_div").innerHTML
-					= ", current: " + ev.evalTable(table_c)
-					+ ", orig: " + old_best;
+				slowAsyncLoop(cw_current, cw_best, ev, 0, 10, 50);
 			}
 		</script>
 	</head>

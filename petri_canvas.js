@@ -39,6 +39,8 @@ function canvasWriter(canvas) {
 					Math.max.apply(null, col));
 		}
 		this.resetScale();
+		this.reset();
+		this.drawAxis();
 	}
 
 	this.addCursor = function(state, level, color) {
