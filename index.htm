@@ -13,10 +13,18 @@
 				catch (e) { alert("failed to parse network defintion."); }
 				try { init_obj = JSON.parse(document.getElementById("initial_input").value); }
 				catch (e) { alert("failed to parse initial values."); }
-				var table = calcVectTable(init_obj, net_obj,20);
+				var table = calcVectTable(init_obj, net_obj,150);
 				document.getElementById("output_div").innerHTML = vectTableToHTML(table);
 				var cw = new canvasWriter(document.getElementById("chart_canvas"));
+				cw.setSizeBasedOnDataSet(table);
+				cw.reset();
 				cw.drawAxis();
+				cw.addCursor("heat", table[0]["heat"], "red");
+				cw.addCursor("wood", table[0]["wood"], "brown");
+				for (x in table) {
+					cw.drawFromCursor("heat", table[x]["heat"]);
+					cw.drawFromCursor("wood", table[x]["wood"]);
+				}
 			}
 		</script>
 	</head>

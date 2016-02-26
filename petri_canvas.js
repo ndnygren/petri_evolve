@@ -10,10 +10,49 @@ function canvasWriter(canvas) {
 	this.data_x_high = 15.0;
 	this.data_y_high = 15.0;
 	this.data_scale = 10.0;
+	this.last_cursors = [];
+
+	this.reset = function() {
+		this.canvas.getContext('2d').clearRect(0, 0, this.canvas.width, this.canvas.height);
+	}
+
+	this.setSizeBasedOnDataSet = function(list) {
+		this.data_x_high = Math.max(20, list.length);
+		if (!list || list.length < 1) { throw("bad data set"); }
+		for (key in list[0]) {
+			col = list.map(function(x) { return x[key]; });
+			this.data_y_low = Math.min(this.data_y_low,
+					Math.min.apply(null, col));
+			this.data_y_high = Math.max(this.data_y_high,
+					Math.max.apply(null, col));
+		}
+		this.resetScale();
+	}
+
+	this.addCursor = function(state, level, color) {
+		this.last_cursors.push({"state":state, "level":level, "color":color, "time":0});
+	}
+
+	this.drawFromCursor = function(state, level) {
+		for (var i = 0; i < this.last_cursors.length; i++) {
+			var last = this.last_cursors[i];
+			if (last.state == state) {
+				this.drawLine(this.scaleX(last.time),
+					this.scaleY(last.level),
+					this.scaleX(last.time+1),
+					this.scaleY(level),
+					last.color, 2.0);
+				last.time++;
+				last.level = level;
+			}
+		}
+	}
 
 	this.drawLine = function(x1,y1,x2,y2,color,width) {
 		var context = this.canvas.getContext('2d');
 
+		context.strokeStyle = color;
+		context.lineWidth = width;
 		context.beginPath();
 		context.moveTo(x1, y1);
 		context.lineTo(x2, y2);
@@ -21,7 +60,8 @@ function canvasWriter(canvas) {
 	}
 
 	this.resetScale = function() {
-		this.scale = Math.min(this.width/(this.data_x_high - this.data_x_low), this.height/(this.data_y_high - this.data_y_low));
+		this.scale = Math.min(this.width/(this.data_x_high - this.data_x_low),
+				this.height/(this.data_y_high - this.data_y_low));
 	}
 
 	this.scaleX = function(x) {
@@ -29,7 +69,7 @@ function canvasWriter(canvas) {
 	}
 
 	this.scaleY = function(y) {
-		return (y - this.data_y_low)*this.scale + this.border;
+		return this.height - (y - this.data_y_low)*this.scale + this.border;
 	}
 
 	this.drawAxis = function() {
