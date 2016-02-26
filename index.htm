@@ -4,12 +4,37 @@
 	<head>
 		<title>Petri Calc Sandbox</title>
 		<script type="text/javascript" src="petri_calc.js"></script>
+		<link href="style.css" rel="stylesheet" type="text/css" />
+		<script type="text/javascript">
+			function load_network_def() {
+				var net_obj, init_obj;
+				try { net_obj = JSON.parse(document.getElementById("network_input").value); }
+				catch (e) { alert("failed to parse network defintion."); }
+				try { init_obj = JSON.parse(document.getElementById("initial_input").value); }
+				catch (e) { alert("failed to parse initial values."); }
+			}
+		</script>
 	</head>
 	<body>
 		<h1>Petri Calc Sandbox</h1>
 		<div id="main_content_div">
-			<textarea id="network_input"></textarea>
+			<table>
+				<tr>
+					<td>Enter network definition:</td>
+					<td><textarea id="network_input">
+			[
+				{"name": "h_in", "input": ["heat"], "output": [], "rate": 0.5},
+				{"name": "h_out", "input": [], "output": ["heat"], "rate": 0.5}
+			]
+				</textarea></td></tr>
+				<tr><td>Enter initial settings:</td>
+				<td><textarea id="initial_input"> [{"heat":50.0}] </textarea>
+				</td></tr>
+	</table>
+			<button onclick="load_network_def();">Start</button>
+
 		</div>
+		<div id="output_div"><div>
 	</body>
 
 </html>
