@@ -4,6 +4,7 @@
 	<head>
 		<title>Petri Calc Sandbox</title>
 		<script type="text/javascript" src="petri_calc.js"></script>
+		<script type="text/javascript" src="petri_canvas.js"></script>
 		<link href="style.css" rel="stylesheet" type="text/css" />
 		<script type="text/javascript">
 			function load_network_def() {
@@ -14,6 +15,8 @@
 				catch (e) { alert("failed to parse initial values."); }
 				var table = calcVectTable(init_obj, net_obj,20);
 				document.getElementById("output_div").innerHTML = vectTableToHTML(table);
+				var cw = new canvasWriter(document.getElementById("chart_canvas"));
+				cw.drawAxis();
 			}
 		</script>
 	</head>
@@ -37,6 +40,7 @@
 			<button onclick="load_network_def();">Start</button>
 
 		</div>
+		<div id="canvas_div"><canvas id="chart_canvas"></canvas><div>
 		<div id="output_div"><div>
 	</body>
 
