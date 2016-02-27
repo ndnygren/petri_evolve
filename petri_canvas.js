@@ -11,6 +11,7 @@ function canvasWriter(canvas) {
 	this.data_y_high = 15.0;
 	this.data_scale = 10.0;
 	this.last_cursors = [];
+	this.colors = {};
 
 	this.reset = function() {
 		this.last_cursors = [];
@@ -18,6 +19,7 @@ function canvasWriter(canvas) {
 	}
 
 	this.drawCurves = function (table, colors) {
+		this.colors = colors;
 		for (color in colors){
 			this.addCursor(color, table[0][color] || 0, colors[color]);
 		}
@@ -62,8 +64,10 @@ function canvasWriter(canvas) {
 		}
 	}
 
-	this.drawTarget = function(time, quant) {
-		this.drawCircle(this.scaleX(time), this.scaleY(quant), 3, "blue");
+	this.drawTarget = function(time, quant, color) {
+		var c = "blue";
+		if (this.colors[color]) { c = this.colors[color]; }
+		this.drawCircle(this.scaleX(time), this.scaleY(quant), 3, c);
 	}
 
 	this.drawCircle = function(x,y,r,color) {

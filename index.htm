@@ -28,17 +28,20 @@
 					ev.makeLambdaSet(lambda);
 					cw_b.setSizeBasedOnDataSet(table);
 					cw_b.drawCurves(table, color_obj);
+					for (x in crit_obj) {
+						cw_b.drawTarget(crit_obj[x].time, crit_obj[x].quant, crit_obj[x].state);
+					}
 				}
 				var table_c = ev.calcTable(ev.ls[frame % lambda]);
 				cw_c.setSizeBasedOnDataSet(table_c);
 				cw_c.drawCurves(table_c, color_obj);
 				for (x in crit_obj) {
-					cw_c.drawTarget(crit_obj[x].time, crit_obj[x].quant);
+					cw_c.drawTarget(crit_obj[x].time, crit_obj[x].quant, crit_obj[x].state);
 					//cw_best.drawTarget(crit_obj[x].time, crit_obj[x].quant);
 				}
 
 				document.getElementById("output_div").innerHTML
-					+= "</br>frame " + frame
+					= "frame " + frame
 					+ ", current: " + ev.evalTable(table_c)
 					+ ", orig: " + ev.evalTable(ev.calcTable(ev.best_net));
 
@@ -57,12 +60,18 @@
 				var cw_current = new canvasWriter(document.getElementById("current_canvas"));
 				var cw_best = new canvasWriter(document.getElementById("best_canvas"));
 				var ev = new petriEvolve(init_obj, net_obj, crit_obj);
-				slowAsyncLoop(cw_current, cw_best, ev, 0, 10, 50);
+				ev.freq = document.getElementById("input_freq").value;
+				ev.intensity = document.getElementById("input_inten").value;
+
+				slowAsyncLoop(cw_current, cw_best, ev, 0,
+						document.getElementById("input_lambda").value,
+						document.getElementById("input_gen").value);
 			}
 		</script>
 	</head>
 	<body>
 		<h1>Petri Calc Sandbox</h1>
+		<h2>Net Definition:</h2>
 		<div id="main_content_div">
 			<table>
 				<tr>
@@ -84,7 +93,9 @@
 			<button onclick="load_network_def();">Load</button>
 
 		</div>
+		<h2>Preview:</h2>
 		<div id="canvas_div"><canvas id="chart_canvas"></canvas></div>
+		<h2>Optimization Options:</h2>
 		<div id="">
 			<table>
 				<tr>
@@ -92,8 +103,23 @@
 					<td> <textarea id="crit_input"> [{"time":100, "state": "heat", "quant": 20.0},{"time":20, "state": "heat", "quant": 30.0},{"time":100, "state": "wood", "quant": 0.0}] </textarea> </td>
 				</tr>
 			</table>
+			<table>
+				<tr>
+					<th>Generations</th>
+					<th>Lambda</th>
+					<th>Frequency</th>
+					<th>Intensity</th>
+				</tr>
+				<tr>
+					<td><input id="input_gen" value="50" /></td>
+					<td><input id="input_lambda" value="10" /></td>
+					<td><input id="input_freq" value="0.3" /></td>
+					<td><input id="input_inten" value="0.5" /></td>
+				</tr>
+			</table>
 			<button onclick="start_network_evolve();">Start</button>
 		</div>
+		<h2>Progress:</h2>
 		<div id="evolve_div">
 			<table>
 				<tr><th>current</th><th>best</th></tr>
@@ -103,6 +129,7 @@
 				</tr>
 			</table>
 		</div>
+		<h2>Output:</h2>
 		<div id="output_div"></div>
 	</body>
 

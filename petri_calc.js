@@ -73,7 +73,9 @@ function petriEvolve(init_vect, net_obj, crit_obj) {
 	this.net_obj = net_obj;
 	this.crit_obj = crit_obj;
 	this.best_net = net_obj;
-	this.ls;
+	this.ls = [];
+	this.freq = 0.3;
+	this.intensity = 0.5;
 
 	this.calcTable = function(net) {
 		var steps = 0;
@@ -108,8 +110,8 @@ function petriEvolve(init_vect, net_obj, crit_obj) {
 	}
 
 	this.mutateNetRates = function(net_obj) {
-		var freq = 0.3;
-		var intensity = 0.5;
+		var freq = this.freq;
+		var intensity = this.intensity;
 		var output = [];
 		var temp;
 
