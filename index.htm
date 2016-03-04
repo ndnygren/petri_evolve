@@ -7,15 +7,15 @@
 		<script type="text/javascript" src="petri_canvas.js"></script>
 		<link href="style.css" rel="stylesheet" type="text/css" />
 		<script type="text/javascript">
-			var net_obj, init_obj, color_obj, crit_obj;
+			var net_obj, color_obj, crit_obj;
 			function load_network_def() {
 				try { net_obj = JSON.parse(document.getElementById("network_input").value); }
 				catch (e) { alert("failed to parse network defintion."); }
-				try { init_obj = JSON.parse(document.getElementById("initial_input").value); }
+				try { crit_obj = JSON.parse(document.getElementById("initial_input").value); }
 				catch (e) { alert("failed to parse initial values."); }
 				try { color_obj = JSON.parse(document.getElementById("colors_input").value); }
 				catch (e) { alert("failed to parse color values."); }
-				var table = calcVectTable(init_obj, net_obj,150);
+				var table = calcVectTable(crit_obj[0].initial, net_obj,150);
 				document.getElementById("output_div").innerHTML = vectTableToHTML(table);
 				var cw = new canvasWriter(document.getElementById("chart_canvas"));
 				cw.setSizeBasedOnDataSet(table);
@@ -28,16 +28,17 @@
 					ev.makeLambdaSet(lambda);
 					cw_b.setSizeBasedOnDataSet(table);
 					cw_b.drawCurves(table, color_obj);
-					for (x in crit_obj) {
-						cw_b.drawTarget(crit_obj[x].time, crit_obj[x].quant, crit_obj[x].state);
+					for (x in crit_obj[0].criteria) {
+						var t = crit_obj[0].criteria[x];
+						cw_b.drawTarget(t.time, t.quant, t.state);
 					}
 				}
 				var table_c = ev.calcTable(ev.ls[frame % lambda]);
 				cw_c.setSizeBasedOnDataSet(table_c);
 				cw_c.drawCurves(table_c, color_obj);
-				for (x in crit_obj) {
-					cw_c.drawTarget(crit_obj[x].time, crit_obj[x].quant, crit_obj[x].state);
-					//cw_best.drawTarget(crit_obj[x].time, crit_obj[x].quant);
+				for (x in crit_obj[0].criteria) {
+					var t = crit_obj[0].criteria[x];
+					cw_c.drawTarget(t.time, t.quant, t.state);
 				}
 
 				document.getElementById("output_div").innerHTML
@@ -55,11 +56,9 @@
 
 			function start_network_evolve() {
 				load_network_def();
-				try { crit_obj = JSON.parse(document.getElementById("crit_input").value); }
-				catch (e) { alert("failed to parse criteria values."); }
 				var cw_current = new canvasWriter(document.getElementById("current_canvas"));
 				var cw_best = new canvasWriter(document.getElementById("best_canvas"));
-				var ev = new petriEvolve(init_obj, net_obj, crit_obj);
+				var ev = new petriEvolve(crit_obj[0].initial, net_obj, crit_obj[0].criteria);
 				ev.freq = document.getElementById("input_freq").value;
 				ev.intensity = document.getElementById("input_inten").value;
 
@@ -84,7 +83,8 @@
 			]
 				</textarea></td></tr>
 				<tr><td>Enter initial settings:</td>
-				<td><textarea id="initial_input"> {"heat":50.0, "wood":50} </textarea>
+					<td><textarea id="initial_input">
+							[{"initial":{"heat":50.0, "wood":50}, "criteria": [{"time":100, "state": "heat", "quant": 20.0},{"time":20, "state": "heat", "quant": 30.0},{"time":100, "state": "wood", "quant": 0.0}] }] </textarea>
 				</td></tr>
 				<tr><td>Enter colors:</td>
 				<td><textarea id="colors_input"> {"heat": "red", "wood": "brown"} </textarea>
@@ -97,12 +97,6 @@
 		<div id="canvas_div"><canvas id="chart_canvas"></canvas></div>
 		<h2>Optimization Options:</h2>
 		<div id="">
-			<table>
-				<tr>
-					<td>Enter optimization criteria:</td>
-					<td> <textarea id="crit_input"> [{"time":100, "state": "heat", "quant": 20.0},{"time":20, "state": "heat", "quant": 30.0},{"time":100, "state": "wood", "quant": 0.0}] </textarea> </td>
-				</tr>
-			</table>
 			<table>
 				<tr>
 					<th>Generations</th>

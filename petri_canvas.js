@@ -31,6 +31,8 @@ function canvasWriter(canvas) {
 	}
 
 	this.setSizeBasedOnDataSet = function(list) {
+		this.data_y_low = -1;
+		this.data_y_high = 1;
 		this.data_x_high = Math.max(20, list.length);
 		if (!list || list.length < 1) { throw("bad data set"); }
 		for (key in list[0]) {
