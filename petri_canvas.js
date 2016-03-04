@@ -96,16 +96,16 @@ function canvasWriter(canvas) {
 	}
 
 	this.resetScale = function() {
-		this.scale = Math.min(this.width/(this.data_x_high - this.data_x_low),
-				this.height/(this.data_y_high - this.data_y_low));
+		this.scaleh = this.width/(this.data_x_high - this.data_x_low);
+		this.scalev = this.height/(this.data_y_high - this.data_y_low);
 	}
 
 	this.scaleX = function(x) {
-		return (x - this.data_x_low)*this.scale + this.border;
+		return (x - this.data_x_low)*this.scaleh + this.border;
 	}
 
 	this.scaleY = function(y) {
-		return this.height - (y - this.data_y_low)*this.scale + this.border;
+		return this.height - (y - this.data_y_low)*this.scalev + this.border;
 	}
 
 	this.drawAxis = function() {
