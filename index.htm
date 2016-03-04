@@ -18,28 +18,17 @@
 				var table = calcVectTable(crit_obj[0].initial, net_obj,150);
 				document.getElementById("output_div").innerHTML = vectTableToHTML(table);
 				var cw = new canvasWriter(document.getElementById("chart_canvas"));
-				cw.setSizeBasedOnDataSet(table);
-				cw.drawCurves(table, color_obj);
+				cw.loadTable(table, color_obj, crit_obj);
 			}
 
 			function slowAsyncLoop(cw_c, cw_b, ev, frame, lambda, gens) {
 				if (frame % lambda == 0) {
 					var table = ev.calcTable(ev.bestInSet(ev.ls));
 					ev.makeLambdaSet(lambda);
-					cw_b.setSizeBasedOnDataSet(table);
-					cw_b.drawCurves(table, color_obj);
-					for (x in crit_obj[0].criteria) {
-						var t = crit_obj[0].criteria[x];
-						cw_b.drawTarget(t.time, t.quant, t.state);
-					}
+					cw_b.loadTable(table, color_obj, crit_obj);
 				}
 				var table_c = ev.calcTable(ev.ls[frame % lambda]);
-				cw_c.setSizeBasedOnDataSet(table_c);
-				cw_c.drawCurves(table_c, color_obj);
-				for (x in crit_obj[0].criteria) {
-					var t = crit_obj[0].criteria[x];
-					cw_c.drawTarget(t.time, t.quant, t.state);
-				}
+				cw_c.loadTable(table_c, color_obj, crit_obj);
 
 				document.getElementById("output_div").innerHTML
 					= "frame " + frame
@@ -48,7 +37,7 @@
 
 				if (frame < lambda * gens) {
 					setTimeout(function () {
-							slowAsyncLoop(cw_c, cw_b, ev, frame+1, lambda, gens);
+						slowAsyncLoop(cw_c, cw_b, ev, frame+1, lambda, gens);
 					}, 1);
 
 				}
@@ -58,7 +47,7 @@
 				load_network_def();
 				var cw_current = new canvasWriter(document.getElementById("current_canvas"));
 				var cw_best = new canvasWriter(document.getElementById("best_canvas"));
-				var ev = new petriEvolve(crit_obj[0].initial, net_obj, crit_obj[0].criteria);
+				var ev = new petriEvolve(crit_obj, net_obj);
 				ev.freq = document.getElementById("input_freq").value;
 				ev.intensity = document.getElementById("input_inten").value;
 
@@ -84,10 +73,13 @@
 				</textarea></td></tr>
 				<tr><td>Enter initial settings:</td>
 					<td><textarea id="initial_input">
-							[{"initial":{"heat":50.0, "wood":50}, "criteria": [{"time":100, "state": "heat", "quant": 20.0},{"time":20, "state": "heat", "quant": 30.0},{"time":100, "state": "wood", "quant": 0.0}] }] </textarea>
+							[
+							{"initial":{"heat":50.0, "wood":50}, "criteria": [{"time":100, "state": "heat", "quant": 20.0},{"time":20, "state": "heat", "quant": 30.0},{"time":100, "state": "wood", "quant": 0.0}] },
+							{"initial":{"heat":0.0, "wood":50}, "criteria": [{"time":100, "state": "heat", "quant": 20.0},{"time":20, "state": "heat", "quant": 20.0},{"time":100, "state": "wood", "quant": 0.0}] }
+							] </textarea>
 				</td></tr>
 				<tr><td>Enter colors:</td>
-				<td><textarea id="colors_input"> {"heat": "red", "wood": "brown"} </textarea>
+				<td><textarea id="colors_input"> {"heat": "red", "wood": "orange"} </textarea>
 				</td></tr>
 	</table>
 			<button onclick="load_network_def();">Load</button>

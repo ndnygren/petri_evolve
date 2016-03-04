@@ -121,6 +121,15 @@ function canvasWriter(canvas) {
 				"black", 1.0);
 	}
 
+	this.loadTable = function(table, color_obj, crit_obj){
+		this.setSizeBasedOnDataSet(table);
+		this.drawCurves(table, color_obj);
+		for (var x in crit_obj[0].criteria) {
+			var t = crit_obj[0].criteria[x];
+			this.drawTarget(t.time, t.quant, t.state);
+		}
+	}
+
 	this.resetScale();
 }
 

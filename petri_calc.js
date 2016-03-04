@@ -68,8 +68,7 @@ function calcVectTable(init_vect, net_obj, steps) {
 	return output;
 }
 
-function petriEvolve(init_vect, net_obj, crit_obj) {
-	this.init_vect = init_vect;
+function petriEvolve(crit_obj, net_obj) {
 	this.net_obj = net_obj;
 	this.crit_obj = crit_obj;
 	this.best_net = net_obj;
@@ -79,11 +78,17 @@ function petriEvolve(init_vect, net_obj, crit_obj) {
 
 	this.calcTable = function(net) {
 		var steps = 0;
-		for (var x in this.crit_obj) {
-			steps = Math.max(steps, this.crit_obj[x].time);
+		var output = [];
+		for (var j in this.crit_obj)
+			for (var x in this.crit_obj[j].criteria) {
+				steps = Math.max(steps, this.crit_obj[j].criteria[x].time);
+			}
+
+		for (var j in this.crit_obj) {
+			output.push(calcVectTable(this.crit_obj[j].initial, net, steps+5));
 		}
 
-		return calcVectTable(this.init_vect, net, steps+5);
+		return output;
 	}
 
 	this.bestTable = function() {
@@ -93,8 +98,13 @@ function petriEvolve(init_vect, net_obj, crit_obj) {
 	this.evalTable = function(table) {
 		var error = 0;
 		var diff;
-		for (var x in this.crit_obj) {
-			diff = table[this.crit_obj[x].time][this.crit_obj[x].state] - this.crit_obj[x].quant;
+		if (table.length != this.crit_obj.length){
+			throw("Table("+table.length+") to Criteria("+this.crit_obj.length+") mismatch.");
+		}
+		for (var j in this.crit_obj)
+		for (var x in this.crit_obj[j].criteria) {
+			var cr = this.crit_obj[j].criteria[x];
+			diff = table[j][cr.time][cr.state] - cr.quant;
 			error += (diff*diff);
 		}
 
