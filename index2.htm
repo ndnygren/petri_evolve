@@ -6,7 +6,26 @@
 		<title>Petri Diag Sandbox</title>
 		<script type="text/javascript" src="petri_calc.js"></script>
 		<script type="text/javascript" src="petri_canvas.js"></script>
+		<script type="text/javascript" src="petri.js"></script>
 		<script type="text/javascript" src="examples.js"></script>
+		<script type="text/javascript">
+			function readPetriInput()
+{
+				var formstring = document.getElementById("network_input").value;
+				var net_obj, commands;
+				try{
+					net_obj = JSON.parse(formstring);
+				} catch (e) {
+					throw("Could not read network input.");
+				}
+				commands = readCommand(net_obj);
+				document.getElementById("output_box").innerHTML =  JSON.stringify(commands, null, 2)
+				+ "<br/> states:" + JSON.stringify(stateList(commands))
+				+ "<br/> transistions:" + JSON.stringify(transList(commands))
+				+ "<br/> idx:" + JSON.stringify(StateTransCommonIdx(stateList(commands), transList(commands)))
+				+ "<br/> transistions:" + JSON.stringify(toStateTransMtx(commands));
+
+			}	</script>
 		<link href="style.css" rel="stylesheet" type="text/css" />
 	</head>
 	<body>
@@ -14,8 +33,11 @@
 		<h2>Net Definition:</h2>
 		<div id="main_content_div">
 			Enter network definition:
-			<textarea id="network_input">[ { "name": "h_out", "input": [ "heat" ], "output": [], "rate": 1 }, { "name": "h_in", "input": [], "output": [ "heat" ], "rate": 1 } ]</textarea>
+			<textarea id="network_input">[ { "name": "1", "input": [ "1" ], "output": [], "rate": 1 }, { "name": "2", "input": [], "output": [ "1" ], "rate": 1 } ]</textarea>
+			<button onclick="readPetriInput()">Load</button>
 		</div>
+		<h2>Output:</h2>
+		<div id="output_box">
 	</body>
 </html>
 
