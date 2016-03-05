@@ -24,6 +24,7 @@
 				var serlist = mtxToSerList(mtx);
 				var shorted = removeAll2ndOrder(serlist);
 				var output = "";
+				var fact = new petriSVGfact();
 				output += JSON.stringify(commands, null, 2);
 				output += "<br/> states:" + JSON.stringify(stateList(commands));
 				output += "<br/> transistions:" + JSON.stringify(transList(commands));
@@ -39,6 +40,8 @@
 				last = serNodeToXY(mergeAllPar(serlist)[0]);
 				output += "<br/> xy:" + JSON.stringify(last);
 				output += "<br/> " + makeSVGsimple(last);
+				output += "<br/> " + JSON.stringify(withNameAndType(last, commands));
+				output += "<br/> " + fact.make(withNameAndType(last, commands), commands);
 				document.getElementById("output_box").innerHTML = output;
 			}
 			</script>
@@ -49,8 +52,8 @@
 		<h2>Net Definition:</h2>
 		<div id="main_content_div">
 			Enter network definition:
-			<textarea id="network_input">[ { "name": "1", "input": [ "1","4" ], "output": [], "rate": 1 },
-				{ "name": "2", "input": [], "output": [ "1","4" ], "rate": 1 } ]</textarea>
+			<textarea id="network_input">[ { "name": "h_out", "input": [ "heat","other" ], "output": [], "rate": 1 },
+				{ "name": "h_in", "input": [], "output": [ "other","heat" ], "rate": 1 } ]</textarea>
 			<button onclick="readPetriInput()">Load</button>
 		</div>
 		<h2>Output:</h2>

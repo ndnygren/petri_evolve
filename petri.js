@@ -363,7 +363,7 @@ function idxList(postParse, offs)
 		if (last !== output[idx])
 		{
 			last = output[idx];
-			output1.push(parseInt(last))
+			output1.push(last);
 		}
 	}
 
@@ -395,15 +395,16 @@ function NbyNNull(n)
 function StateTransCommonIdx(states, trans)
 {
 	var output = {};
-	output.s = [];
-	output.t = [];
+	output.s = {};
+	output.t = {};
+	var count = 0;
 	for (var idx in states)
 	{
-		output.s[states[idx]] = parseInt(idx);
+		output.s[states[idx]] = count++;
 	}
 	for (var idx in trans)
 	{
-		output.t[trans[idx]] = parseInt(idx) + states.length;
+		output.t[trans[idx]] = count++;
 	}
 
 	return output;
@@ -430,6 +431,32 @@ function toStateTransMtx(postparse)
 	{
 		output[mtx_idx.s[postparse.o[idx][0]]][mtx_idx.t[postparse.o[idx][1]]] = true;
 	}
+	return output;
+}
+
+function withNameAndType(xy, postparse)
+{
+	var output = [];
+	var states = stateList(postparse);
+	var trans = transList(postparse);
+	var mtx_idx = StateTransCommonIdx(states, trans);
+
+	for (var idx in xy)
+	{
+		output[xy[idx].name] = xy[idx];
+	}
+
+	for (var idx in mtx_idx.s)
+	{
+		output[mtx_idx.s[idx]].display = idx;
+		output[mtx_idx.s[idx]].type = "state";
+	}
+	for (var idx in mtx_idx.t)
+	{
+		output[mtx_idx.t[idx]].display = idx;
+		output[mtx_idx.t[idx]].type = "trans";
+	}
+
 	return output;
 }
 
