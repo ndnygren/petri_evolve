@@ -5,7 +5,7 @@
 		<title>Petri Diag Sandbox</title>
 		<script type="text/javascript" src="petri_calc.js"></script>
 		<script type="text/javascript" src="petri_canvas.js"></script>
-		<script type="text/javascript" src="petri.js"></script>
+		<script type="text/javascript" src="petri_graph.js"></script>
 		<script type="text/javascript" src="examples.js"></script>
 		<script type="text/javascript">
 			function readPetriInput()
@@ -24,6 +24,7 @@
 				var output = "";
 				var fact = new petriSVGfact();
 				var comb = new SPGParNode(null, null);
+				/*
 				output += JSON.stringify(commands, null, 2);
 				output += "<br/> states:" + JSON.stringify(stateList(commands));
 				output += "<br/> transistions:" + JSON.stringify(transList(commands));
@@ -33,17 +34,18 @@
 				output += "<br/> counts:" + JSON.stringify(countNodeOrders(serlist));
 				output += "<br/> new serlist:" + JSON.stringify(findAndRemove2ndOrderNode(serlist));
 				output += "<br/> shortened:" + JSON.stringify(shorted);
+				*/
 				normalizeAndSortSerList(shorted);
-				output += "<br/> shortened:" + JSON.stringify(shorted);
-				output += "<br/> parmerge:" + JSON.stringify(mergeAllPar(serlist));
+				//output += "<br/> shortened:" + JSON.stringify(shorted);
+				//output += "<br/> parmerge:" + JSON.stringify(mergeAllPar(serlist));
 				comb.data = mergeAllPar(serlist);
 				comb.data = mergeAllLone(comb.data);
-				output += "<br/>classify leaves: " + SPGDebug(comb.data);
+				//output += "<br/>classify leaves: " + SPGDebug(comb.data);
 				last = serNodeToXY(comb);
 
-				output += "<br/> xy:" + JSON.stringify(last);
-				output += "<br/> " + JSON.stringify(withNameAndType(last, commands));
-				output += "<br/> " + fact.make(withNameAndType(last, commands), commands);
+				output += "xy:" + JSON.stringify(last) + "</br>";
+				//output += "<br/> " + JSON.stringify(withNameAndType(last, commands));
+				output += fact.make(withNameAndType(last, commands), commands);
 				document.getElementById("output_box").innerHTML = output;
 			}
 			</script>

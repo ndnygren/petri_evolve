@@ -735,7 +735,7 @@ function withNameAndType(xy, postparse)
 function petriSVGfact()
 {
 	this.radius = 10.0;
-	this.tsize = {w: 200, h: 300};
+	this.tsize = {w: 20, h: 30};
 	this.mult = 30.0;
 	this.xoffs = 10.0;
 	this.yoffs = 10.0;
@@ -743,7 +743,7 @@ function petriSVGfact()
 	this.svgtop = function(w, h)
 	{
 		var svghead = " xmlns=\"http://www.w3.org/2000/svg\" xmlns:svg=\"http://www.w3.org/2000/svg\" ";
-		return "<svg width=\"" + w + "\" height=\"" + h + "\"" + svghead + ">\n";
+		return "<svg viewbox=\"" + (-this.xoffs)  + " " + 0.0 + " " + w + " " + h + "\"" + svghead + ">\n";
 	}
 
 	this.makeTrans = function(loc, mult, xoffs, yoffs)
@@ -804,6 +804,19 @@ function petriSVGfact()
 		return {x: loc.x*Math.cos(angle) - loc.y*Math.sin(angle),
 		y: loc.x*Math.sin(angle) + loc.y*Math.cos(angle) };
 	}
+
+	this.lineArray = function (locarr) {
+		var output = "\t<path d=\"M";
+		if (locarr.length < 2) { throw("Array too short for lineArray."); }
+		var temp = locarr.map(function(q) { return q.x + "," + q.y + " "; });
+		output += temp[0];
+		for (var i = 1; i < temp.length; i++) {
+			output += "L" + temp[i];
+		}
+		output += "\" style=\"stroke-opacity:0.7;stroke:rgb(0,0,0);stroke-width:1\" fill=\"none\" />\n";
+		return output;
+	}
+
 	this.lineAt = function(loc1, loc2)
 	{
 		return "<line x1=\"" + loc1.x + "\" "
@@ -854,8 +867,9 @@ function petriSVGfact()
 		for (var i = 0; i < iter; i++)
 		{
 			output += this.curveAt(start, end)
-				+ this.lineAt(end, this.radialLine(end, angle + Math.PI/3, this.radius/6.0))
-				+ this.lineAt(end, this.radialLine(end, angle - Math.PI/9, this.radius/6.0));
+				+ this.lineArray([this.radialLine(end, angle - Math.PI/9, this.radius/3.0),
+				end,
+				this.radialLine(end, angle + Math.PI/3, this.radius/3.0)]);
 			start = this.locAdd(start, inc);
 			end = this.locAdd(end, inc)
 		}
@@ -907,6 +921,8 @@ function petriSVGfact()
 	{
 		var output = "";
 		this.radius = 10;
+		this.tsize.w = 4*this.xoffs + this.mult * Math.max.apply(null, xy.map(function (x) {return x.x;}));
+		this.tsize.h = 4*this.yoffs + this.mult * Math.max.apply(null, xy.map(function (x) {return x.y;}));
 		output += this.svgtop(this.tsize.w, this.tsize.h);
 		output += this.makeObjs(xy);
 		output += this.makeText(xy);
