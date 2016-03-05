@@ -237,7 +237,6 @@ function petriSVGfact()
 		this.mm.border = this.tsize.h/10.0;
 		this.tsize.w = this.mm.findW(this.tsize.h);
 		this.radius = 10;
-		alert(this.mm.mult() + "," + this.mm.xoffs());
 		output += this.svgtop(this.tsize.w, this.tsize.h);
 		output += this.makeObjs(xy);
 		output += this.makeText(xy);
