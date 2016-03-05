@@ -1,5 +1,5 @@
 
-var petri_examples = [{},{}];
+var petri_examples = [{},{},{}];
 
 petri_examples[0].network = [
 	{
@@ -109,4 +109,54 @@ petri_examples[1].colors = {
 	"ethanol":"blue",
 	"yeast":"green"
 };
+
+petri_examples[2].network = [
+	{
+		"name": "eat",
+		"input": [ "rabbit", "grass" , "grass", "grass"],
+		"output": [ "rabbit", "rabbit" ],
+		"rate": 0.00007349
+	},
+	{
+		"name": "die",
+		"input": [ "rabbit" ],
+		"output": [  ],
+		"rate": 0.00007349
+	},
+	{
+		"name": "grow",
+		"input": [ "grass" ],
+		"output": [ "grass","grass" ],
+		"rate": 0.00007349
+	}
+];
+petri_examples[2].initial = [
+	{
+                "initial":{"grass":1000.0, "rabbit":10.0},
+                "criteria": [
+			{"time":100, "state": "grass", "quant": 200.0},
+			{"time":90, "state": "grass", "quant": 200.0},
+			{"time":100, "state": "rabbit", "quant": 30.0},
+			{"time":90, "state": "rabbit", "quant": 30.0},
+		]
+	},
+	{
+                "initial":{"grass":10.0},
+                "criteria": [
+			{"time":100, "state": "grass", "quant": 1000.0},
+			{"time":85, "state": "grass", "quant": 500.0},
+			{"time":100, "state": "rabbit", "quant": 0.0},
+			{"time":50, "state": "rabbit", "quant": 0.0},
+		]
+	},
+	{
+                "initial":{"rabbit":10.0},
+                "criteria": [
+			{"time":100, "state": "grass", "quant": 0.0},
+			{"time":50, "state": "grass", "quant": 0.0},
+			{"time":100, "state": "rabbit", "quant": 0.0},
+		]
+	}
+];
+petri_examples[2].colors = {"grass":"green", "rabbit":"gray"};
 
