@@ -11,16 +11,17 @@
 			function readPetriInput()
 {
 				var formstring = document.getElementById("network_input").value;
-				var net_obj, commands, last;
+				var net_obj, last;
 				try{
 					net_obj = JSON.parse(formstring);
 				} catch (e) {
 					throw("Could not read network input.");
 				}
-				commands = readCommand(net_obj);
-				var mtx = toStateTransMtx(commands);
-				var serlist = mtxToSerList(mtx);
-				var shorted = removeAll2ndOrder(serlist);
+				var spgg = new SPGGrouper();
+				var commands = spgg.readCommand(net_obj);
+				var mtx = spgg.toStateTransMtx(commands);
+				var serlist = spgg.mtxToSerList(mtx);
+				var shorted = spgg.removeAll2ndOrder(serlist);
 				var output = "";
 				var fact = new petriSVGfact();
 				var comb = new SPGParNode(null, null);
@@ -35,17 +36,17 @@
 				output += "<br/> new serlist:" + JSON.stringify(findAndRemove2ndOrderNode(serlist));
 				output += "<br/> shortened:" + JSON.stringify(shorted);
 				*/
-				normalizeAndSortSerList(shorted);
+				spgg.normalizeAndSortSerList(shorted);
 				//output += "<br/> shortened:" + JSON.stringify(shorted);
 				//output += "<br/> parmerge:" + JSON.stringify(mergeAllPar(serlist));
-				comb.data = mergeAllPar(serlist);
-				comb.data = mergeAllLone(comb.data);
+				comb.data = spgg.mergeAllPar(serlist);
+				comb.data = spgg.mergeAllLone(comb.data);
 				//output += "<br/>classify leaves: " + SPGDebug(comb.data);
-				last = serNodeToXY(comb);
+				last = spgg.serNodeToXY(comb);
 
 				output += "xy:" + JSON.stringify(last) + "</br>";
 				//output += "<br/> " + JSON.stringify(withNameAndType(last, commands));
-				output += fact.make(withNameAndType(last, commands), commands);
+				output += fact.make(spgg.withNameAndType(last, commands), commands);
 				document.getElementById("output_box").innerHTML = output;
 			}
 			</script>

@@ -183,12 +183,15 @@ function SPGDebug(serlist)
 	return output + "]";
 }
 
-function numPairToSeries (lhs,rhs)
+function SPGGrouper() {
+}
+
+SPGGrouper.prototype.numPairToSeries = function (lhs,rhs)
 {
 	return new SPGSeriesNode(new SPGLeafNode(lhs), new SPGLeafNode(rhs));
 }
 
-function mtxToSerList(mtx)
+SPGGrouper.prototype.mtxToSerList = function(mtx)
 {
 	var output = [];
 
@@ -198,7 +201,7 @@ function mtxToSerList(mtx)
 		{
 			if (mtx[i][j] || mtx[j][i])
 			{
-				output.push(numPairToSeries(i,j));
+				output.push(this.numPairToSeries(i,j));
 			}
 		}
 	}
@@ -206,7 +209,7 @@ function mtxToSerList(mtx)
 	return output;
 }
 
-function uniqueCount(list)
+SPGGrouper.prototype.uniqueCount = function(list)
 {
 	list.sort();
 	if (!list || list.length == 0) { return 0; }
@@ -220,14 +223,14 @@ function uniqueCount(list)
 	return count;
 }
 
-function uniqueCountInListOfList(list)
+SPGGrouper.prototype.uniqueCountInListOfList = function(list)
 {
 	var output = [];
-	for (var i in list) { output[i] = uniqueCount(list[i]); }
+	for (var i in list) { output[i] = this.uniqueCount(list[i]); }
 	return output;
 }
 
-function countUNodeOrders(serlist)
+SPGGrouper.prototype.countUNodeOrders = function(serlist)
 {
 	var output = [];
 
@@ -239,10 +242,10 @@ function countUNodeOrders(serlist)
 		if (output[rhs]) { output[rhs].push(lhs); } else { output[rhs] = [lhs]; }
 	}
 
-	return uniqueCountInListOfList(output);
+	return this.uniqueCountInListOfList(output);
 }
 
-function countNodeOrders(serlist)
+SPGGrouper.prototype.countNodeOrders = function(serlist)
 {
 	var output = [];
 
@@ -257,7 +260,7 @@ function countNodeOrders(serlist)
 	return output;
 }
 
-function mergeSerNodes(lhs, rhs)
+SPGGrouper.prototype.mergeSerNodes = function(lhs, rhs)
 {
 	var output;
 
@@ -287,7 +290,7 @@ function mergeSerNodes(lhs, rhs)
 
 // For a node of order 2, the SPGSeriesNodes containing it will be removed and
 // a single merged SPGNode will be added
-function elim2OrderNode(idx, serlist)
+SPGGrouper.prototype.elim2OrderNode = function(idx, serlist)
 {
 	var lhs = -1, rhs = -1;
 	var temp1, temp2;
@@ -305,35 +308,35 @@ function elim2OrderNode(idx, serlist)
 	temp2 = serlist[rhs];
 	output = serlist.slice(0);
 	output.splice(rhs, 1);
-	output[lhs] = mergeSerNodes(temp1, temp2);
+	output[lhs] = this.mergeSerNodes(temp1, temp2);
 
 	return output;
 }
 
-function findAndRemove2ndOrderNode(serlist)
+SPGGrouper.prototype.findAndRemove2ndOrderNode = function(serlist)
 {
-	var counts = countNodeOrders(serlist);
-	var ucounts = countUNodeOrders(serlist);
+	var counts = this.countNodeOrders(serlist);
+	var ucounts = this.countUNodeOrders(serlist);
 	var idx = counts.indexOf(2);
 	while (idx > -1 && ucounts[idx] != 2) { idx = counts.indexOf(2, idx+1); }
 	if (idx == -1) { return serlist; }
-	return elim2OrderNode(idx, serlist);
+	return this.elim2OrderNode(idx, serlist);
 }
 
-function removeAll2ndOrder(serlist)
+SPGGrouper.prototype.removeAll2ndOrder = function(serlist)
 {
 	var oldlength = serlist.length + 1;
 
 	while (serlist.length != oldlength)
 	{
 		oldlength = serlist.length;
-		serlist = findAndRemove2ndOrderNode(serlist);
+		serlist = this.findAndRemove2ndOrderNode(serlist);
 	}
 
 	return serlist;
 }
 
-function normalizeAndSortSerList(serlist)
+SPGGrouper.prototype.normalizeAndSortSerList = function(serlist)
 {
 	for (var i = 0; i < serlist.length; i++)
 	{
@@ -349,14 +352,14 @@ function normalizeAndSortSerList(serlist)
 		});
 }
 
-function findAndMergePar(serlist)
+SPGGrouper.prototype.findAndMergePar = function(serlist)
 {
 	var lhs, rhs;
 	var parnode;
 	var innerlist = [];
 	var output;
 
-	normalizeAndSortSerList(serlist);
+	this.normalizeAndSortSerList(serlist);
 	output = serlist.slice(0);
 
 	for (var i = 0; i < serlist.length; i++)
@@ -385,20 +388,20 @@ function findAndMergePar(serlist)
 	return output;
 }
 
-function mergeAllPar(serlist)
+SPGGrouper.prototype.mergeAllPar = function(serlist)
 {
 	var oldlength = serlist.length + 1;
 	while (serlist.length != oldlength)
 	{
 		oldlength = serlist.length;
-		serlist = removeAll2ndOrder(serlist);
-		serlist = findAndMergePar(serlist);
+		serlist = this.removeAll2ndOrder(serlist);
+		serlist = this.findAndMergePar(serlist);
 	}
 
 	return serlist;
 }
 
-function countLeaves(counts, serlist)
+SPGGrouper.prototype.countLeaves = function(counts, serlist)
 {
 	var output = [];
 	output.length = counts.length;
@@ -412,7 +415,7 @@ function countLeaves(counts, serlist)
 	return output;
 }
 
-function findNodeWithLeaves(lcount)
+SPGGrouper.prototype.findNodeWithLeaves = function(lcount)
 {
 	var found = -1;
 	for (var i = 0; i < lcount.length && found == -1; i++)
@@ -422,7 +425,7 @@ function findNodeWithLeaves(lcount)
 	return found;
 }
 
-function leavesOn(node, counts, serlist)
+SPGGrouper.prototype.leavesOn = function(node, counts, serlist)
 {
 	var output = [];
 	for (var i in serlist)
@@ -436,7 +439,7 @@ function leavesOn(node, counts, serlist)
 	return output;
 }
 
-function removeMaxHeight(leaves, serlist)
+SPGGrouper.prototype.removeMaxHeight = function(leaves, serlist)
 {
 	var output = leaves.slice(0);
 	var max = 0;
@@ -453,7 +456,7 @@ function removeMaxHeight(leaves, serlist)
 	return output;
 }
 
-function splitSerList(leaves, serlist)
+SPGGrouper.prototype.splitSerList = function(leaves, serlist)
 {
 	var output = {leaf: [], nonleaf: []};
 	for (var i in serlist)
@@ -465,7 +468,7 @@ function splitSerList(leaves, serlist)
 	return output;
 }
 
-function mergeLeafs(found, newid, list)
+SPGGrouper.prototype.mergeLeafs = function(found, newid, list)
 {
 	var output = new SPGSeriesNode();
 	output.data = [new SPGLeafNode(newid), new SPGParNode(), new SPGLeafNode(found)];
@@ -485,7 +488,7 @@ function mergeLeafs(found, newid, list)
 	return output;
 }
 
-function maxNodeId(serlist)
+SPGGrouper.prototype.maxNodeId = function(serlist)
 {
 	var output = 0;
 	for (i = 0; i < serlist.length; i++)
@@ -496,35 +499,35 @@ function maxNodeId(serlist)
 	return output;
 }
 
-function classifyLeaves(serlist)
+SPGGrouper.prototype.classifyLeaves = function(serlist)
 {
-	var counts = countNodeOrders(serlist);
-	var lcount = countLeaves(counts, serlist);
-	var found = findNodeWithLeaves(lcount);
+	var counts = this.countNodeOrders(serlist);
+	var lcount = this.countLeaves(counts, serlist);
+	var found = this.findNodeWithLeaves(lcount);
 	if (found == -1) { return serlist; }
-	var leaves = leavesOn(found, counts, serlist);
-	if (counts[found] == lcount[found]) { leaves = removeMaxHeight(leaves, serlist); }
+	var leaves = this.leavesOn(found, counts, serlist);
+	if (counts[found] == lcount[found]) { leaves = this.removeMaxHeight(leaves, serlist); }
 	if (leaves.length == 1) { return serlist; }
-	var split = splitSerList(leaves, serlist);
+	var split = this.splitSerList(leaves, serlist);
 	var output = split.nonleaf;
-	output.push(mergeLeafs(found, maxNodeId(serlist)+1, split.leaf));
+	output.push(this.mergeLeafs(found, this.maxNodeId(serlist)+1, split.leaf));
 	return output;
 }
 
-function mergeAllLeaf(serlist)
+SPGGrouper.prototype.mergeAllLeaf = function(serlist)
 {
 	var oldlength = serlist.length + 1;
 	while (serlist.length != oldlength)
 	{
 		oldlength = serlist.length;
-		serlist = mergeAllPar(serlist);
-		serlist = classifyLeaves(serlist);
+		serlist = this.mergeAllPar(serlist);
+		serlist = this.classifyLeaves(serlist);
 	}
 
 	return serlist;
 }
 
-function foldOverLoneLeaf(found, leaf, ser)
+SPGGrouper.prototype.foldOverLoneLeaf = function(found, leaf, ser)
 {
 	if (leaf.first() != found) { leaf = leaf.reverse(); }
 	if (ser.first() != found) { ser = ser.reverse(); }
@@ -541,14 +544,14 @@ function foldOverLoneLeaf(found, leaf, ser)
 	return output;
 }
 
-function classifyLoneLeaves(serlist)
+SPGGrouper.prototype.classifyLoneLeaves = function(serlist)
 {
-	var counts = countNodeOrders(serlist);
-	var lcount = countLeaves(counts, serlist);
-	var found = findNodeWithLeaves(lcount);
+	var counts = this.countNodeOrders(serlist);
+	var lcount = this.countLeaves(counts, serlist);
+	var found = this.findNodeWithLeaves(lcount);
 	if (found == -1) { return serlist; }
-	var leaves = leavesOn(found, counts, serlist);
-	var split = splitSerList(leaves, serlist);
+	var leaves = this.leavesOn(found, counts, serlist);
+	var split = this.splitSerList(leaves, serlist);
 	var output = split.nonleaf;
 	var neigh;
 	for (var i in output)
@@ -558,24 +561,26 @@ function classifyLoneLeaves(serlist)
 			neigh = i;
 		}
 	}
-	output[neigh] = foldOverLoneLeaf(found, split.leaf[0], output[neigh]);
+	output[neigh] = this.foldOverLoneLeaf(found, split.leaf[0], output[neigh]);
 	return output;
 }
 
-function mergeAllLone(serlist)
+//iterates the mergeAllLeaf function, collecting leaf (and newly created leaf)
+SPGGrouper.prototype.mergeAllLone = function(serlist)
 {
         var oldlength = serlist.length + 1;
         while (serlist.length != oldlength)
         {
                 oldlength = serlist.length;
-                serlist = mergeAllLeaf(serlist);
-                serlist = classifyLoneLeaves(serlist);
+                serlist = this.mergeAllLeaf(serlist);
+                serlist = this.classifyLoneLeaves(serlist);
         }
 
         return serlist;
 }
 
-function serNodeToXY(ser)
+//converts a serial node into a list of xy pairs
+SPGGrouper.prototype.serNodeToXY = function(ser)
 {
 	var starth = ser.width()/2.0;
 	var output = ser.XY(0.0, starth);
@@ -583,7 +588,7 @@ function serNodeToXY(ser)
 }
 
 // ensures all elements are numeric rather than string
-function intifyArray(arr)
+SPGGrouper.prototype.intifyArray = function(arr)
 {
 	var output = [];
 
@@ -597,7 +602,7 @@ function intifyArray(arr)
 
 // breaks the input, line-by-line and parses each separately
 // divides into 2 definitions (arrays), input and output
-function readCommand(net_obj)
+SPGGrouper.prototype.readCommand = function(net_obj)
 {
 	var output = {};
 	output.i = [];
@@ -612,13 +617,12 @@ function readCommand(net_obj)
 		}
 	}
 
-
 	return output;
 }
 
 // looks at input and output definitions and collects unique lists
 // for either state or transition
-function idxList(postParse, offs)
+SPGGrouper.prototype.idxList = function(postParse, offs)
 {
 	var output = [], output1 = [];
 	var last;
@@ -640,12 +644,12 @@ function idxList(postParse, offs)
 }
 
 // unique ordered list of all states in use
-function stateList(postParse) { return idxList(postParse, 0); }
+SPGGrouper.prototype.stateList = function(postParse) { return this.idxList(postParse, 0); }
 // unique ordered list of all transitions in use
-function transList(postParse) { return idxList(postParse, 1); }
+SPGGrouper.prototype.transList = function(postParse) { return this.idxList(postParse, 1); }
 
 // creates a N-by-N matrix, undefined everywhere
-function NbyNNull(n)
+SPGGrouper.prototype.NbyNNull = function(n)
 {
 	var output = [];
 	output.length = n;
@@ -661,7 +665,7 @@ function NbyNNull(n)
 
 // Creates a pair of lookup tables, to identify row/column
 // for the combined list of states and transitions
-function StateTransCommonIdx(states, trans)
+SPGGrouper.prototype.StateTransCommonIdx = function(states, trans)
 {
 	var output = {};
 	output.s = {};
@@ -681,13 +685,13 @@ function StateTransCommonIdx(states, trans)
 
 // creates an adjacentcy matrix, treating both states and transitions
 // as nodes in the same graph. Used for graph drawing.
-function toStateTransMtx(postparse)
+SPGGrouper.prototype.toStateTransMtx = function(postparse)
 {
-	var states = stateList(postparse);
-	var trans = transList(postparse);
+	var states = this.stateList(postparse);
+	var trans = this.transList(postparse);
 	var size = states.length + trans.length;
-	var output = NbyNNull(size);
-	var mtx_idx = StateTransCommonIdx(states, trans);
+	var output = this.NbyNNull(size);
+	var mtx_idx = this.StateTransCommonIdx(states, trans);
 
 	for (var idx in postparse.i)
 	{
@@ -703,12 +707,12 @@ function toStateTransMtx(postparse)
 	return output;
 }
 
-function withNameAndType(xy, postparse)
+SPGGrouper.prototype.withNameAndType = function(xy, postparse)
 {
 	var output = [];
-	var states = stateList(postparse);
-	var trans = transList(postparse);
-	var mtx_idx = StateTransCommonIdx(states, trans);
+	var states = this.stateList(postparse);
+	var trans = this.transList(postparse);
+	var mtx_idx = this.StateTransCommonIdx(states, trans);
 	var maxnode = 0;
 	for (var idx in mtx_idx.t) { maxnode = Math.max(maxnode, mtx_idx.t[idx]); }
 
