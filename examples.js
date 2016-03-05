@@ -132,7 +132,7 @@ petri_examples[2].network = [
 ];
 petri_examples[2].initial = [
 	{
-                "initial":{"grass":1000.0, "rabbit":10.0},
+                "initial":{"grass":300.0, "rabbit":10.0},
                 "criteria": [
 			{"time":100, "state": "grass", "quant": 200.0},
 			{"time":90, "state": "grass", "quant": 200.0},

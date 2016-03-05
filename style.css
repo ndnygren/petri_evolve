@@ -29,3 +29,19 @@ textarea {
 	height: 80px;
 }
 
+ul.clicky_menu_list li {
+	background-color:white;
+	list-style-type: none;
+	margin: 5px;
+	padding: 2px;
+	border: 1px dotted black;
+	box-shadow: 0 2px 2px rgba(0,0,0,.3);
+}
+
+ul.clicky_menu_list li:hover {
+	background-color:gray;
+}
+
+ul.clicky_menu_list li:active {
+	background-color:black;
+}

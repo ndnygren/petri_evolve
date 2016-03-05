@@ -50,14 +50,15 @@
 
 				document.getElementById("output_div").innerHTML
 					= "frame " + frame
-					+ ", current: " + ev.evalTable(table_c)
-					+ ", orig: " + ev.evalTable(ev.calcTable(ev.best_net));
+					+ ", MSE: " + ev.evalTable(ev.calcTable(ev.best_net));
 
 				if (frame < lambda * gens) {
 					setTimeout(function () {
 						slowAsyncLoop(cw_c, cw_b, ev, frame+1, lambda, gens);
 						}, 1);
 				} else {
+				document.getElementById("slow_button").disabled=false;
+				document.getElementById("fast_button").disabled=false;
 					document.getElementById("output_div").innerHTML
 						+= "<h3>Proposed Changes</h3>"
 						+"<textarea id=\"evo_result_text\" disabled=true>" + JSON.stringify(ev.best_net, null, "\t") + "</textarea>"
@@ -65,17 +66,50 @@
 				}
 			}
 
-			function start_network_evolve() {
+			function fastAsyncLoop(cw_c, cw_b, ev, frame, lambda, gens) {
+				ev.makeLambdaSet(lambda);
+				var table = ev.calcTable(ev.bestInSet(ev.ls));
+				cw_b.loadTable(table, color_obj, crit_obj);
+
+				document.getElementById("output_div").innerHTML
+					= "frame " + frame
+					+ ", MSE: " + ev.evalTable(table);
+
+				if (frame < gens) {
+					setTimeout(function () {
+						fastAsyncLoop(cw_c, cw_b, ev, frame+1, lambda, gens);
+						}, 1);
+				} else {
+					document.getElementById("slow_button").disabled=false;
+					document.getElementById("fast_button").disabled=false;
+					document.getElementById("output_div").innerHTML
+						+= "<h3>Proposed Changes</h3>"
+						+"<textarea id=\"evo_result_text\" disabled=true>"
+						+ JSON.stringify(ev.best_net, null, "\t")
+						+ "</textarea>"
+						+ "<button onclick='copyResultToInit()'>Accept</button>";
+				}
+			}
+			function start_network_evolve(fast_animate) {
 				load_network_def();
+				document.getElementById("slow_button").disabled=true;
+				document.getElementById("fast_button").disabled=true;
 				var cw_current = new canvasWriter(document.getElementById("current_canvas"));
 				var cw_best = new canvasWriter(document.getElementById("best_canvas"));
 				var ev = new petriEvolve(crit_obj, net_obj);
 				ev.freq = document.getElementById("input_freq").value;
 				ev.intensity = document.getElementById("input_inten").value;
-
+				cw_current.reset();
+				cw_best.reset();
+				if (fast_animate){
+				fastAsyncLoop(cw_current, cw_best, ev, 0,
+						document.getElementById("input_lambda").value,
+						document.getElementById("input_gen").value);
+				} else {
 				slowAsyncLoop(cw_current, cw_best, ev, 0,
 						document.getElementById("input_lambda").value,
 						document.getElementById("input_gen").value);
+				}
 			}
 		</script>
 	</head>
@@ -132,7 +166,8 @@
 					<td><input id="input_inten" value="0.9" /></td>
 				</tr>
 			</table>
-			<button onclick="start_network_evolve();">Start</button>
+			<button id="slow_button" onclick="start_network_evolve(false);">Slow</button>
+			<button id="fast_button" onclick="start_network_evolve(true);">Fast</button>
 		</div>
 		<h2>Progress:</h2>
 		<div id="evolve_div">
