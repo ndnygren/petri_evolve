@@ -6,7 +6,6 @@
 		<script type="text/javascript" src="petri_calc.js"></script>
 		<script type="text/javascript" src="petri_canvas.js"></script>
 		<script type="text/javascript" src="petri.js"></script>
-		<script type="text/javascript" src="svgPetri.js"></script>
 		<script type="text/javascript" src="examples.js"></script>
 		<script type="text/javascript">
 			function readPetriInput()
@@ -43,7 +42,6 @@
 				last = serNodeToXY(comb);
 
 				output += "<br/> xy:" + JSON.stringify(last);
-				output += "<br/> " + makeSVGsimple(last);
 				output += "<br/> " + JSON.stringify(withNameAndType(last, commands));
 				output += "<br/> " + fact.make(withNameAndType(last, commands), commands);
 				document.getElementById("output_box").innerHTML = output;
