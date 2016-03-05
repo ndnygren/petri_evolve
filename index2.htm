@@ -19,13 +19,25 @@
 					throw("Could not read network input.");
 				}
 				commands = readCommand(net_obj);
-				document.getElementById("output_box").innerHTML =  JSON.stringify(commands, null, 2)
-				+ "<br/> states:" + JSON.stringify(stateList(commands))
-				+ "<br/> transistions:" + JSON.stringify(transList(commands))
-				+ "<br/> idx:" + JSON.stringify(StateTransCommonIdx(stateList(commands), transList(commands)))
-				+ "<br/> transistions:" + JSON.stringify(toStateTransMtx(commands));
-
-			}	</script>
+				var mtx = toStateTransMtx(commands);
+				var serlist = mtxToSerList(mtx);
+				var shorted = removeAll2ndOrder(serlist);
+				var output = "";
+				output += JSON.stringify(commands, null, 2);
+				output += "<br/> states:" + JSON.stringify(stateList(commands));
+				output += "<br/> transistions:" + JSON.stringify(transList(commands));
+				output += "<br/> idx:" + JSON.stringify(StateTransCommonIdx(stateList(commands), transList(commands)));
+				output += "<br/> transistions:" + JSON.stringify(toStateTransMtx(commands));
+				output += "<br/> serList:" + JSON.stringify(serlist);
+				output += "<br/> counts:" + JSON.stringify(countNodeOrders(serlist));
+				output += "<br/> new serlist:" + JSON.stringify(findAndRemove2ndOrderNode(serlist));
+				output += "<br/> shortened:" + JSON.stringify(shorted);
+				normalizeAndSortSerList(shorted);
+				output += "<br/> shortened:" + JSON.stringify(shorted);
+				output += "<br/> parmerge:" + JSON.stringify(findAndMergePar(removeAll2ndOrder(serlist)));
+				document.getElementById("output_box").innerHTML = output;
+			}
+			</script>
 		<link href="style.css" rel="stylesheet" type="text/css" />
 	</head>
 	<body>
@@ -33,7 +45,8 @@
 		<h2>Net Definition:</h2>
 		<div id="main_content_div">
 			Enter network definition:
-			<textarea id="network_input">[ { "name": "1", "input": [ "1" ], "output": [], "rate": 1 }, { "name": "2", "input": [], "output": [ "1" ], "rate": 1 } ]</textarea>
+			<textarea id="network_input">[ { "name": "1", "input": [ "1","4" ], "output": [], "rate": 1 },
+				{ "name": "2", "input": [], "output": [ "1","4" ], "rate": 1 } ]</textarea>
 			<button onclick="readPetriInput()">Load</button>
 		</div>
 		<h2>Output:</h2>
