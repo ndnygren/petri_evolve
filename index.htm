@@ -5,9 +5,19 @@
 		<title>Petri Calc Sandbox</title>
 		<script type="text/javascript" src="petri_calc.js"></script>
 		<script type="text/javascript" src="petri_canvas.js"></script>
+		<script type="text/javascript" src="examples.js"></script>
 		<link href="style.css" rel="stylesheet" type="text/css" />
 		<script type="text/javascript">
 			var net_obj, color_obj, crit_obj;
+
+			function loadExample(idx) {
+				if (!petri_examples[idx]) {
+					throw("Bad index ("+idx+") for examples.");
+				}
+				document.getElementById("network_input").value = JSON.stringify(petri_examples[idx].network, null, "\t");
+				document.getElementById("initial_input").value = JSON.stringify(petri_examples[idx].initial, null, "\t");
+				document.getElementById("colors_input").value = JSON.stringify(petri_examples[idx].colors, null, "\t");
+			}
 
 			function copyResultToInit() {
 				document.getElementById("network_input").value = document.getElementById("evo_result_text").value;
@@ -48,7 +58,7 @@
 				} else {
 					document.getElementById("output_div").innerHTML
 						+= "<h3>Proposed Changes</h3>"
-						+"<textarea id=\"evo_result_text\" disabled=true>" + JSON.stringify(ev.best_net, null, 2) + "</textarea>"
+						+"<textarea id=\"evo_result_text\" disabled=true>" + JSON.stringify(ev.best_net, null, "\t") + "</textarea>"
 						+ "<button onclick='copyResultToInit()'>Accept</button>";
 				}
 			}
@@ -71,27 +81,33 @@
 		<h1>Petri Calc Sandbox</h1>
 		<h2>Net Definition:</h2>
 		<div id="main_content_div">
+			<span style=" display: flex; ">
 			<table>
 				<tr>
 					<td>Enter network definition:</td>
-					<td><textarea id="network_input">
-			[
-				{"name": "h_out", "input": ["heat"], "output": [], "rate": 0.05},
-				{"name": "burn", "input": ["wood"], "output": ["heat"], "rate": 0.05},
-				{"name": "h_in", "input": [], "output": ["heat"], "rate": 0.5}
-			]
-				</textarea></td></tr>
-				<tr><td>Enter initial settings:</td>
-					<td><textarea id="initial_input">
-							[
-							{"initial":{"heat":50.0, "wood":50}, "criteria": [{"time":100, "state": "heat", "quant": 20.0},{"time":20, "state": "heat", "quant": 30.0},{"time":100, "state": "wood", "quant": 0.0}] },
-							{"initial":{"heat":0.0, "wood":50}, "criteria": [{"time":100, "state": "heat", "quant": 20.0},{"time":20, "state": "heat", "quant": 20.0},{"time":100, "state": "wood", "quant": 0.0}] }
-							] </textarea>
-				</td></tr>
-				<tr><td>Enter colors:</td>
-				<td><textarea id="colors_input"> {"heat": "red", "wood": "orange"} </textarea>
-				</td></tr>
-	</table>
+					<td>
+						<textarea id="network_input"> [ ] </textarea>
+					</td>
+				</tr>
+				<tr>
+					<td>Enter initial settings:</td>
+					<td>
+						<textarea id="initial_input"> [ ] </textarea>
+					</td>
+				</tr>
+				<tr>
+					<td>Enter colors:</td>
+					<td>
+						<textarea id="colors_input"> {} </textarea>
+					</td>
+				</tr>
+			</table>
+			<h3>Load Examples</h3>
+			<ul class="clicky_menu_list">
+				<li onclick="loadExample(0)">Example 1</li>
+				<li onclick="loadExample(1)">Example 2</li>
+			</ul>
+			</span>
 			<button onclick="load_network_def();">Load</button>
 
 		</div>
@@ -109,7 +125,7 @@
 				<tr>
 					<td><input id="input_gen" value="50" /></td>
 					<td><input id="input_lambda" value="10" /></td>
-					<td><input id="input_freq" value="0.3" /></td>
+					<td><input id="input_freq" value="0.9" /></td>
 					<td><input id="input_inten" value="0.5" /></td>
 				</tr>
 			</table>
