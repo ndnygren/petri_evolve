@@ -11,6 +11,7 @@ function SPGLeafNode (input)
 	this.reverse = function () { return this; }
 	this.width = function () { return 1.0; }
 	this.height = function () { return 1.0; }
+	this.copy = function() { return new SPGLeafNode(this.data); }
 }
 
 function SPGSeriesNode(lhs, rhs)
@@ -38,7 +39,8 @@ function SPGSeriesNode(lhs, rhs)
 	this.width = function()
 	{
 		var output = 0.0;
-		for (i = 0; i < this.data.length; i++)
+
+		for (var i = 0; i < this.data.length; i++)
 		{
 			output = Math.max(output, this.data[i].width());
 		}
@@ -48,7 +50,7 @@ function SPGSeriesNode(lhs, rhs)
 	this.height = function()
 	{
 		var output = 0.0;
-		for (i = 0; i < this.data.length; i++)
+		for (var i = 0; i < this.data.length; i++)
 		{
 			output += this.data[i].height();
 		}
@@ -60,7 +62,7 @@ function SPGSeriesNode(lhs, rhs)
 		var output = new SPGSeriesNode(this.data[0], this.data[0]);
 
 		output.data.length = this.data.length;
-		for (i = 0; i < this.data.length; i++)
+		for (var i = 0; i < this.data.length; i++)
 		{
 			output.data[i] = this.data[this.data.length - i - 1].reverse();
 		}
@@ -81,6 +83,14 @@ function SPGSeriesNode(lhs, rhs)
 
 		return output;
 	}
+
+	this.copy = function()
+	{
+		var output = new SPGSeriesNode();
+		output.data = [];
+		output.data.length = this.data.length;
+		for (var i in this.data) { output.data[i] = this.data[i].copy(); }
+	}
 }
 
 function SPGParNode(lhs, rhs)
@@ -92,7 +102,7 @@ function SPGParNode(lhs, rhs)
 	this.height = function()
 	{
 		var output = 0.0;
-		for (i = 0; i < this.data.length; i++)
+		for (var i = 0; i < this.data.length; i++)
 		{
 			output = Math.max(output, this.data[i].height());
 		}
@@ -116,7 +126,7 @@ function SPGParNode(lhs, rhs)
 	this.width = function()
 	{
 		var output = 0.0;
-		for (i = 0; i < this.data.length; i++)
+		for (var i = 0; i < this.data.length; i++)
 		{
 			output += this.data[i].width();
 		}
@@ -126,6 +136,14 @@ function SPGParNode(lhs, rhs)
 	this.reverse = function()
 	{
 		return this;
+	}
+
+	this.copy = function()
+	{
+		var output = new SPGParNode();
+		output.data = [];
+		output.data.length = this.data.length;
+		for (var i in this.data) { output.data[i] = this.data[i].copy(); }
 	}
 }
 
@@ -156,7 +174,7 @@ function countNodeOrders(serlist)
 {
 	var output = [];
 
-	for (i = 0; i < serlist.length; i++)
+	for (var i = 0; i < serlist.length; i++)
 	{
 		lhs = serlist[i].first();
 		rhs = serlist[i].last();
@@ -180,16 +198,16 @@ function mergeSerNodes(lhs, rhs)
 		rhs = rhs.reverse();
 	}
 
-	output = new SPGSeriesNode(lhs.data[0], lhs.data[1]);
+	output = new SPGSeriesNode(lhs.data[0].copy(), lhs.data[1].copy());
 
 	for (var i = 2; i < lhs.data.length; i++)
 	{
-		output.data.push(lhs.data[i]);
+		output.data.push(lhs.data[i].copy());
 	}
 
 	for (var i = 1; i < rhs.data.length; i++)
 	{
-		output.data.push(rhs.data[i]);
+		output.data.push(rhs.data[i].copy());
 	}
 
 	return output;
@@ -274,13 +292,13 @@ function findAndMergePar(serlist)
 			&& serlist[j].last() == serlist[i].last())
 			; j++)
 		{
-			innerlist.push(serlist[j].inner());
+			innerlist.push(serlist[j].inner().copy());
 		}
 		if (j != i + 1)
 		{
-			innerlist.push(serlist[i].inner());
+			innerlist.push(serlist[i].inner().copy());
 			parnode = new SPGParNode();
-			parnode.data = innerlist;
+			parnode.data = innerlist.slice(0);
 			output.splice(i+1, j - i - 1);
 			output[i].data = [output[i].data[0],
 					parnode,
@@ -296,7 +314,6 @@ function findAndMergePar(serlist)
 function mergeAllPar(serlist)
 {
 	var oldlength = serlist.length + 1;
-
 	while (serlist.length != oldlength)
 	{
 		oldlength = serlist.length;
@@ -460,3 +477,35 @@ function withNameAndType(xy, postparse)
 	return output;
 }
 
+function readPetriInput(formstring)
+{
+	var commands = readCommand(formstring);
+	var mtx = toStateTransMtx(commands);
+	var serlist = mtxToSerList(mtx);
+	var shorted = removeAll2ndOrder(serlist);
+	var last;
+	var output = "";
+	var fact = new petriSVGfact();
+	var comb = new SPGParNode(null, null);
+
+	output += JSON.stringify(commands)
+		+ "<br/> states:" + JSON.stringify(stateList(commands))
+		+ "<br/> transistions:" + JSON.stringify(transList(commands))
+		+ "<br/> idx:" + JSON.stringify(StateTransCommonIdx(stateList(commands), transList(commands)))
+		+ "<br/> transistions:" + JSON.stringify(mtx)
+		+ "<br/> serList:" + JSON.stringify(serlist)
+		+ "<br/> counts:" + JSON.stringify(countNodeOrders(serlist))
+		+ "<br/> new serlist:" + JSON.stringify(findAndRemove2ndOrderNode(serlist));
+	output += "<br/> shortened:" + JSON.stringify(shorted);
+	normalizeAndSortSerList(shorted);
+	output += "<br/> shortened:" + JSON.stringify(shorted);
+	output += "<br/> parmerge:" + JSON.stringify(mergeAllPar(serlist));
+	comb.data = mergeAllPar(serlist);
+	last = serNodeToXY(comb);
+	output += "<br/> xy:" + JSON.stringify(last);
+	output += "<br/> " + makeSVGsimple(last);
+	output += "<br/> " + JSON.stringify(withNameAndType(last, commands));
+	output += "<br/> " + fact.make(withNameAndType(last, commands), commands);
+
+	return output;
+}
