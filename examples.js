@@ -62,13 +62,13 @@ petri_examples[1].network=[
 		"output": ["ethanol","ethanol"],
 		"rate": 1.5
 	},
+/*
 	{
 		"name": "activity",
 		"input": ["yeast",],
 		"output": ["yeast","heat"],
 		"rate": 0.00015
 	},
-	/*
 	{
 		"name": "h_out",
 		"input": [ "heat" ],
