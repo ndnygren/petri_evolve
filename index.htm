@@ -8,6 +8,12 @@
 		<link href="style.css" rel="stylesheet" type="text/css" />
 		<script type="text/javascript">
 			var net_obj, color_obj, crit_obj;
+
+			function copyResultToInit() {
+				document.getElementById("network_input").value = document.getElementById("evo_result_text").value;
+				document.getElementById("output_div").innerHTML = "";
+			}
+
 			function load_network_def() {
 				try { net_obj = JSON.parse(document.getElementById("network_input").value); }
 				catch (e) { alert("failed to parse network defintion."); }
@@ -38,8 +44,12 @@
 				if (frame < lambda * gens) {
 					setTimeout(function () {
 						slowAsyncLoop(cw_c, cw_b, ev, frame+1, lambda, gens);
-					}, 1);
-
+						}, 1);
+				} else {
+					document.getElementById("output_div").innerHTML
+						+= "<h3>Proposed Changes</h3>"
+						+"<textarea id=\"evo_result_text\" disabled=true>" + JSON.stringify(ev.best_net, null, 2) + "</textarea>"
+						+ "<button onclick='copyResultToInit()'>Accept</button>";
 				}
 			}
 
