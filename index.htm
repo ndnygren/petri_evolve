@@ -31,7 +31,9 @@
 				catch (e) { alert("failed to parse initial values."); }
 				try { color_obj = JSON.parse(document.getElementById("colors_input").value); }
 				catch (e) { alert("failed to parse color values."); }
-				var table = calcVectTable(crit_obj[0].initial, net_obj,150);
+				var table = calcVectTable(
+						fillInitVect(net_obj, crit_obj[0].initial),
+						net_obj,150);
 				document.getElementById("output_div").innerHTML = vectTableToHTML(table);
 				var cw = new canvasWriter(document.getElementById("chart_canvas"));
 				cw.loadTable([table], color_obj, [crit_obj[0]]);
@@ -123,10 +125,10 @@
 					<th>Intensity</th>
 				</tr>
 				<tr>
-					<td><input id="input_gen" value="50" /></td>
-					<td><input id="input_lambda" value="10" /></td>
+					<td><input id="input_gen" value="10" /></td>
+					<td><input id="input_lambda" value="5" /></td>
 					<td><input id="input_freq" value="0.9" /></td>
-					<td><input id="input_inten" value="0.5" /></td>
+					<td><input id="input_inten" value="0.9" /></td>
 				</tr>
 			</table>
 			<button onclick="start_network_evolve();">Start</button>

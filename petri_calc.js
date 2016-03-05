@@ -33,7 +33,7 @@ function calcStepSize(key, current_vect, net_obj) {
 function calcAllNext(current_vect, net_obj) {
 	var output = {};
 	for (var x in current_vect) {
-		output[x] = current_vect[x] + calcStepSize(x, current_vect, net_obj);
+		output[x] = Math.max(0, current_vect[x] + calcStepSize(x, current_vect, net_obj));
 	}
 	return output;
 }
@@ -68,6 +68,30 @@ function calcVectTable(init_vect, net_obj, steps) {
 	return output;
 }
 
+function fillInitVect(net, init_vect) {
+	var output = {};
+	for (var t in net) {
+		for (var i in net[t].input) {
+			key = net[t].input[i];
+			if (init_vect[key]) {
+				output[key] = init_vect[key];
+			} else {
+				output[key] = 0.0;
+			}
+		}
+		for (var i in net[t].output) {
+			key = net[t].output[i];
+			if (init_vect[key]) {
+				output[key] = init_vect[key];
+			} else {
+				output[key] = 0.0;
+			}
+		}
+	}
+	//throw("input:" + JSON.stringify(init_vect) + "\noutput:" + JSON.stringify(output));
+	return output;
+}
+
 function petriEvolve(crit_obj, net_obj) {
 	this.net_obj = net_obj;
 	this.crit_obj = crit_obj;
@@ -75,6 +99,10 @@ function petriEvolve(crit_obj, net_obj) {
 	this.ls = [];
 	this.freq = 0.3;
 	this.intensity = 0.5;
+
+	for (var x in crit_obj) {
+		crit_obj[x].initial = fillInitVect(net_obj, crit_obj[x].initial);
+	}
 
 	this.calcTable = function(net) {
 		var steps = 0;
@@ -97,15 +125,16 @@ function petriEvolve(crit_obj, net_obj) {
 
 	this.evalTable = function(table) {
 		var error = 0;
-		var diff;
+		var diff = 0;
 		if (table.length != this.crit_obj.length){
 			throw("Table("+table.length+") to Criteria("+this.crit_obj.length+") mismatch.");
 		}
 		for (var j in this.crit_obj)
 		for (var x in this.crit_obj[j].criteria) {
 			var cr = this.crit_obj[j].criteria[x];
-			diff = table[j][cr.time][cr.state] - cr.quant;
+			diff = (table[j][cr.time][cr.state] - cr.quant) || 0;
 			error += (diff*diff);
+			if (isNaN(error)) {throw("Table evaluated to Nan at row " + j + " in " + x + ".\n" + cr.state + "\n" + JSON.stringify(table[j][cr.time]));}
 		}
 
 		return error;
