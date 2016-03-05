@@ -64,7 +64,7 @@ function svgtop(w, h)
 function petriSVGfact()
 {
 	this.radius = 10.0;
-	this.tsize = {w: 200, h: 200};
+	this.tsize = {w: 200, h: 300};
 
 	this.svgtop = function(w, h)
 	{
@@ -234,10 +234,10 @@ function petriSVGfact()
 		var output = "";
 		this.mm = new minmax();
 		this.mm.addArray(xy);
+		this.mm.border = this.tsize.h/10.0;
 		this.tsize.w = this.mm.findW(this.tsize.h);
-		this.mm.border = this.mm.mult()/2.0;
 		this.radius = 10;
-
+		alert(this.mm.mult() + "," + this.mm.xoffs());
 		output += this.svgtop(this.tsize.w, this.tsize.h);
 		output += this.makeObjs(xy);
 		output += this.makeText(xy);

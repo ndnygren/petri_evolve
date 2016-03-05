@@ -2,6 +2,7 @@
 function SPGLeafNode (input)
 {
 	this.data = input;
+	this.code = "L";
 
 	this.XY = function(offx, offy)
 	{
@@ -17,6 +18,7 @@ function SPGLeafNode (input)
 function SPGSeriesNode(lhs, rhs)
 {
 	this.data = [];
+	this.code = "S";
 	this.data.push(lhs);
 	this.data.push(rhs);
 
@@ -96,6 +98,7 @@ function SPGSeriesNode(lhs, rhs)
 function SPGParNode(lhs, rhs)
 {
 	this.data = [];
+	this.code = "P";
 	this.data.push(lhs);
 	this.data.push(rhs);
 
@@ -147,6 +150,18 @@ function SPGParNode(lhs, rhs)
 	}
 }
 
+function SPGDebug(serlist)
+{
+	if (!serlist) { return "_"; }
+	if (typeof(serlist) == 'number') { return serlist; }
+	var output = "["
+	for (var i in serlist)
+	{
+		output += SPGDebug(serlist[i].data) + ",";
+	}
+	return output + "]";
+}
+
 function numPairToSeries (lhs,rhs)
 {
 	return new SPGSeriesNode(new SPGLeafNode(lhs), new SPGLeafNode(rhs));
@@ -168,6 +183,42 @@ function mtxToSerList(mtx)
 	}
 
 	return output;
+}
+
+function uniqueCount(list)
+{
+	list.sort();
+	if (!list || list.length == 0) { return 0; }
+	var count = 1;
+	var last = list[0];
+	for (var i in list)
+	{
+		if (last != list[i]) {count++; last = list[i]; }
+	}
+
+	return count;
+}
+
+function uniqueCountInListOfList(list)
+{
+	var output = [];
+	for (var i in list) { output[i] = uniqueCount(list[i]); }
+	return output;
+}
+
+function countUNodeOrders(serlist)
+{
+	var output = [];
+
+	for (var i = 0; i < serlist.length; i++)
+	{
+		lhs = serlist[i].first();
+		rhs = serlist[i].last();
+		if (output[lhs]) { output[lhs].push(rhs); } else { output[lhs] = [rhs]; }
+		if (output[rhs]) { output[rhs].push(lhs); } else { output[rhs] = [lhs]; }
+	}
+
+	return uniqueCountInListOfList(output);
 }
 
 function countNodeOrders(serlist)
@@ -198,16 +249,16 @@ function mergeSerNodes(lhs, rhs)
 		rhs = rhs.reverse();
 	}
 
-	output = new SPGSeriesNode(lhs.data[0].copy(), lhs.data[1].copy());
+	output = new SPGSeriesNode(lhs.data[0], lhs.data[1]);
 
 	for (var i = 2; i < lhs.data.length; i++)
 	{
-		output.data.push(lhs.data[i].copy());
+		output.data.push(lhs.data[i]);
 	}
 
 	for (var i = 1; i < rhs.data.length; i++)
 	{
-		output.data.push(rhs.data[i].copy());
+		output.data.push(rhs.data[i]);
 	}
 
 	return output;
@@ -241,7 +292,9 @@ function elim2OrderNode(idx, serlist)
 function findAndRemove2ndOrderNode(serlist)
 {
 	var counts = countNodeOrders(serlist);
+	var ucounts = countUNodeOrders(serlist);
 	var idx = counts.indexOf(2);
+	while (idx > -1 && ucounts[idx] != 2) { idx = counts.indexOf(2, idx+1); }
 	if (idx == -1) { return serlist; }
 	return elim2OrderNode(idx, serlist);
 }
@@ -292,13 +345,13 @@ function findAndMergePar(serlist)
 			&& serlist[j].last() == serlist[i].last())
 			; j++)
 		{
-			innerlist.push(serlist[j].inner().copy());
+			innerlist.push(serlist[j].inner());
 		}
 		if (j != i + 1)
 		{
-			innerlist.push(serlist[i].inner().copy());
+			innerlist.push(serlist[i].inner());
 			parnode = new SPGParNode();
-			parnode.data = innerlist.slice(0);
+			parnode.data = innerlist;
 			output.splice(i+1, j - i - 1);
 			output[i].data = [output[i].data[0],
 					parnode,
@@ -335,7 +388,7 @@ function intifyArray(arr)
 {
 	var output = [];
 
-	for (idx in arr)
+	for (var idx in arr)
 	{
 		output.push(parseInt(arr[idx]));
 	}
@@ -477,35 +530,3 @@ function withNameAndType(xy, postparse)
 	return output;
 }
 
-function readPetriInput(formstring)
-{
-	var commands = readCommand(formstring);
-	var mtx = toStateTransMtx(commands);
-	var serlist = mtxToSerList(mtx);
-	var shorted = removeAll2ndOrder(serlist);
-	var last;
-	var output = "";
-	var fact = new petriSVGfact();
-	var comb = new SPGParNode(null, null);
-
-	output += JSON.stringify(commands)
-		+ "<br/> states:" + JSON.stringify(stateList(commands))
-		+ "<br/> transistions:" + JSON.stringify(transList(commands))
-		+ "<br/> idx:" + JSON.stringify(StateTransCommonIdx(stateList(commands), transList(commands)))
-		+ "<br/> transistions:" + JSON.stringify(mtx)
-		+ "<br/> serList:" + JSON.stringify(serlist)
-		+ "<br/> counts:" + JSON.stringify(countNodeOrders(serlist))
-		+ "<br/> new serlist:" + JSON.stringify(findAndRemove2ndOrderNode(serlist));
-	output += "<br/> shortened:" + JSON.stringify(shorted);
-	normalizeAndSortSerList(shorted);
-	output += "<br/> shortened:" + JSON.stringify(shorted);
-	output += "<br/> parmerge:" + JSON.stringify(mergeAllPar(serlist));
-	comb.data = mergeAllPar(serlist);
-	last = serNodeToXY(comb);
-	output += "<br/> xy:" + JSON.stringify(last);
-	output += "<br/> " + makeSVGsimple(last);
-	output += "<br/> " + JSON.stringify(withNameAndType(last, commands));
-	output += "<br/> " + fact.make(withNameAndType(last, commands), commands);
-
-	return output;
-}
