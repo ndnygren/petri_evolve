@@ -10,6 +10,7 @@ function canvasWriter(canvas) {
 	this.data_x_high = 15.0;
 	this.data_y_high = 15.0;
 	this.data_scale = 10.0;
+	this.vert_offs = 0.0;
 	this.last_cursors = [];
 	this.colors = {};
 
@@ -30,7 +31,7 @@ function canvasWriter(canvas) {
 		}
 	}
 
-	this.setSizeBasedOnDataSet = function(list) {
+	this.setSizeBasedOnDataSet = function(list, idx, count) {
 		this.data_y_low = -1;
 		this.data_y_high = 1;
 		this.data_x_high = Math.max(20, list.length);
@@ -42,8 +43,8 @@ function canvasWriter(canvas) {
 			this.data_y_high = Math.max(this.data_y_high,
 					Math.max.apply(null, col));
 		}
-		this.resetScale();
-		this.reset();
+		this.resetScale(count);
+		this.vert_offs = -this.height*idx/count;
 		this.drawAxis();
 	}
 
@@ -95,9 +96,11 @@ function canvasWriter(canvas) {
 		context.stroke();
 	}
 
-	this.resetScale = function() {
+	this.resetScale = function(count) {
 		this.scaleh = this.width/(this.data_x_high - this.data_x_low);
-		this.scalev = this.height/(this.data_y_high - this.data_y_low);
+		this.scalev = ((this.height + 2 * this.border)/count
+			- 2*this.border)
+			/(this.data_y_high - this.data_y_low);
 	}
 
 	this.scaleX = function(x) {
@@ -105,7 +108,7 @@ function canvasWriter(canvas) {
 	}
 
 	this.scaleY = function(y) {
-		return this.height - (y - this.data_y_low)*this.scalev + this.border;
+		return this.height - (y - this.data_y_low)*this.scalev + this.border + this.vert_offs;
 	}
 
 	this.drawAxis = function() {
@@ -122,14 +125,22 @@ function canvasWriter(canvas) {
 	}
 
 	this.loadTable = function(table, color_obj, crit_obj){
-		this.setSizeBasedOnDataSet(table);
-		this.drawCurves(table, color_obj);
-		for (var x in crit_obj[0].criteria) {
-			var t = crit_obj[0].criteria[x];
-			this.drawTarget(t.time, t.quant, t.state);
+		if (table.length != crit_obj.length) {
+			throw("Table("+table.length+") to Criteria("+crit_obj.length+") mismatch.");
+		}
+		this.reset();
+
+		for (var j in table) {
+			this.last_cursors = [];
+			this.setSizeBasedOnDataSet(table[j], j, table.length);
+			this.drawCurves(table[j], color_obj);
+			for (var x in crit_obj[j].criteria) {
+				var t = crit_obj[j].criteria[x];
+				this.drawTarget(t.time, t.quant, t.state);
+			}
 		}
 	}
 
-	this.resetScale();
+	this.resetScale(1);
 }
 

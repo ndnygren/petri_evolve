@@ -18,7 +18,7 @@
 				var table = calcVectTable(crit_obj[0].initial, net_obj,150);
 				document.getElementById("output_div").innerHTML = vectTableToHTML(table);
 				var cw = new canvasWriter(document.getElementById("chart_canvas"));
-				cw.loadTable(table, color_obj, crit_obj);
+				cw.loadTable([table], color_obj, [crit_obj[0]]);
 			}
 
 			function slowAsyncLoop(cw_c, cw_b, ev, frame, lambda, gens) {
