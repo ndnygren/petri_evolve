@@ -3,9 +3,14 @@ function SPGLeafNode (input)
 {
 	this.data = input;
 
+	this.XY = function(offx, offy)
+	{
+		return [{ name: this.data, x: offx, y: offy}];
+	}
+
 	this.reverse = function () { return this; }
-	this.width = function () { return 1; }
-	this.height = function () { return 1; }
+	this.width = function () { return 1.0; }
+	this.height = function () { return 1.0; }
 }
 
 function SPGSeriesNode(lhs, rhs)
@@ -17,18 +22,32 @@ function SPGSeriesNode(lhs, rhs)
 	this.first = function() { return this.data[0].data; }
 	this.last = function() { return this.data[this.data.length-1].data; }
 
+	this.XY = function(offx, offy)
+	{
+		var output = [];
+		var depth = 0.0;
+
+		for (var i = 0; i < this.data.length; i++)
+		{
+			output = output.concat(this.data[i].XY(offx + depth, offy));
+			depth += this.data[i].height();
+		}
+		return output;
+	}
+
 	this.width = function()
 	{
-		var output = 0;
+		var output = 0.0;
 		for (i = 0; i < this.data.length; i++)
 		{
 			output = Math.max(output, this.data[i].width());
 		}
+		return output;
 	}
 
 	this.height = function()
 	{
-		var output = 0;
+		var output = 0.0;
 		for (i = 0; i < this.data.length; i++)
 		{
 			output += this.data[i].height();
@@ -72,16 +91,31 @@ function SPGParNode(lhs, rhs)
 
 	this.height = function()
 	{
-		var output = 0;
+		var output = 0.0;
 		for (i = 0; i < this.data.length; i++)
 		{
 			output = Math.max(output, this.data[i].height());
 		}
+		return output;
+	}
+
+	this.XY = function(offx, offy)
+	{
+		var output = [];
+		var start = offy - this.width()/2.0;
+		var depth = 0.0;
+
+		for (var i = 0; i < this.data.length; i++)
+		{
+			output = output.concat(this.data[i].XY(offx, start + depth + this.data[i].width()/2.0));
+			depth += this.data[i].width();
+		}
+		return output;
 	}
 
 	this.width = function()
 	{
-		var output = 0;
+		var output = 0.0;
 		for (i = 0; i < this.data.length; i++)
 		{
 			output += this.data[i].width();
@@ -256,6 +290,26 @@ function findAndMergePar(serlist)
 		}
 	}
 
+	return output;
+}
+
+function mergeAllPar(serlist)
+{
+	var oldlength = serlist.length + 1;
+
+	while (serlist.length != oldlength)
+	{
+		oldlength = serlist.length;
+		serlist = findAndMergePar(removeAll2ndOrder(serlist));
+	}
+
+	return serlist;
+}
+
+function serNodeToXY(ser)
+{
+	var starth = ser.width()/2.0;
+	var output = ser.XY(0.0, starth);
 	return output;
 }
 

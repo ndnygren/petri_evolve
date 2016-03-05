@@ -7,12 +7,13 @@
 		<script type="text/javascript" src="petri_calc.js"></script>
 		<script type="text/javascript" src="petri_canvas.js"></script>
 		<script type="text/javascript" src="petri.js"></script>
+		<script type="text/javascript" src="svgPetri.js"></script>
 		<script type="text/javascript" src="examples.js"></script>
 		<script type="text/javascript">
 			function readPetriInput()
 {
 				var formstring = document.getElementById("network_input").value;
-				var net_obj, commands;
+				var net_obj, commands, last;
 				try{
 					net_obj = JSON.parse(formstring);
 				} catch (e) {
@@ -34,7 +35,10 @@
 				output += "<br/> shortened:" + JSON.stringify(shorted);
 				normalizeAndSortSerList(shorted);
 				output += "<br/> shortened:" + JSON.stringify(shorted);
-				output += "<br/> parmerge:" + JSON.stringify(findAndMergePar(removeAll2ndOrder(serlist)));
+				output += "<br/> parmerge:" + JSON.stringify(mergeAllPar(serlist));
+				last = serNodeToXY(mergeAllPar(serlist)[0]);
+				output += "<br/> xy:" + JSON.stringify(last);
+				output += "<br/> " + makeSVGsimple(last);
 				document.getElementById("output_box").innerHTML = output;
 			}
 			</script>
