@@ -249,7 +249,7 @@ function petriEvolve(crit_obj, net_obj) {
 		for (var x in net_obj) {
 			temp = this.copyTransition(net_obj[x]);
 			if (Math.random() < freq) {
-				temp.rate *= 1 + ((Math.random() - 0.5) * intensity);
+				temp.rate *= 1 + Math.max((Math.random() - 0.5) * intensity, -0.99);
 			}
 			output.push(temp);
 		}
