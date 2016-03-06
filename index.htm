@@ -99,6 +99,8 @@
 				var ev = new petriEvolve(crit_obj, net_obj);
 				ev.freq = document.getElementById("input_freq").value;
 				ev.intensity = document.getElementById("input_inten").value;
+				ev.edge_inten = document.getElementById("input_edge_inten").value;
+				ev.trans_inten = document.getElementById("input_trans_inten").value;
 				cw_current.reset();
 				cw_best.reset();
 				if (fast_animate){
@@ -155,16 +157,27 @@
 		<div id="">
 			<table>
 				<tr>
+					<th></th>
+					<th></th>
+					<th colspan=2>Rate Mutation</th>
+					<th>Edge Mutation</th>
+					<th>Transition Mut.</th>
+				</tr>
+				<tr>
 					<th>Generations</th>
 					<th>Lambda</th>
 					<th>Frequency</th>
 					<th>Intensity</th>
+					<th>Intensity</th>
+					<th>Intensity</th>
 				</tr>
 				<tr>
-					<td><input id="input_gen" value="10" /></td>
-					<td><input id="input_lambda" value="5" /></td>
-					<td><input id="input_freq" value="0.9" /></td>
-					<td><input id="input_inten" value="0.9" /></td>
+					<td><input type="number" min="1" id="input_gen" value="10" /></td>
+					<td><input type="number" min="1" id="input_lambda" value="5" /></td>
+					<td><input type="number" id="input_freq" value="0.9" /></td>
+					<td><input type="number" id="input_inten" value="0.9" /></td>
+					<td><input type="number" id="input_edge_inten" value="0.0" /></td>
+					<td><input type="number" id="input_trans_inten" value="0.0" /></td>
 				</tr>
 			</table>
 			<button id="slow_button" onclick="start_network_evolve(false);">Slow</button>

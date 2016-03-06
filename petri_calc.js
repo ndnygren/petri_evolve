@@ -89,7 +89,6 @@ function fillInitVect(net, init_vect) {
 			}
 		}
 	}
-	//throw("input:" + JSON.stringify(init_vect) + "\noutput:" + JSON.stringify(output));
 	return output;
 }
 
@@ -98,8 +97,10 @@ function petriEvolve(crit_obj, net_obj) {
 	this.crit_obj = crit_obj;
 	this.best_net = net_obj;
 	this.ls = [];
-	this.freq = 0.3;
+	this.freq = 0.9;
 	this.intensity = 0.5;
+	this.edge_inten = 0.0;
+	this.trans_inten = 0.0;
 
 	for (var x in crit_obj) {
 		crit_obj[x].initial = fillInitVect(net_obj, crit_obj[x].initial);
@@ -139,12 +140,33 @@ function petriEvolve(crit_obj, net_obj) {
 		}
 
 		return error;
-	}
+}
 
 	this.copyTransition = function(t) {
 		var output = {};
 		for (var x in t) {
 			output[x] = t[x];
+		}
+		return output;
+	}
+
+
+	this.mutateNetEdge = function(net_obj) {
+		var output = [];
+		var temp;
+		for (var x in net_obj) {
+			temp = this.copyTransition(net_obj[x]);
+			output.push(temp);
+		}
+		return output;
+	}
+
+	this.mutateNetTrans = function(net_obj) {
+		var output = [];
+		var temp;
+		for (var x in net_obj) {
+			temp = this.copyTransition(net_obj[x]);
+			output.push(temp);
 		}
 		return output;
 	}
@@ -181,8 +203,16 @@ function petriEvolve(crit_obj, net_obj) {
 
 	this.makeLambdaSet = function(lambda) {
 		var output = [];
+		var temp;
 		for (var i = 0; i < lambda; i++) {
-			output.push(this.mutateNetRates(this.best_net));
+			temp = this.best_net;
+			if (Math.random() < this.edge_inten) {
+				temp = this.mutateNetEdge(temp);
+			}
+			if (Math.random() < this.trans_inten) {
+				temp = this.mutateNetTrans(temp);
+			}
+			output.push(this.mutateNetRates(temp));
 		}
 		output.push(this.best_net);
 		this.ls = output;
