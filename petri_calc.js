@@ -30,19 +30,25 @@ function calcStepSize(key, current_vect, net_obj) {
 	return total;
 }
 
+// Given a petri net and a vector of population levels, calculates a new vector,
+// one timestep into the future.
 function calcAllNext(current_vect, net_obj) {
 	var output = {};
+	var step;
 	for (var x in current_vect) {
-		output[x] = Math.max(0, current_vect[x] + calcStepSize(x, current_vect, net_obj));
+		step = calcStepSize(x, current_vect, net_obj);
+		output[x] = isNaN(step)||!isFinite(step) ? current_vect[x] : Math.max(0, current_vect[x] + step);
 	}
 	return output;
 }
 
+// concatenate function that works on arrays
 function sumStrings(array) {
 	if (!array || array.length == 0) { return ""; }
 	return assoc_fold(array, function (x,y) { return x+y; });
 }
 
+// renders a list of population vectors as a list HTML table
 function vectTableToHTML(table){
 	var header = [];
 	var output = "<table>";
@@ -59,6 +65,8 @@ function vectTableToHTML(table){
 	return output + "</table>\n";
 }
 
+// Iterates a petri net on a population vector,
+// creates a list of population vectors, in chronological order.
 function calcVectTable(init_vect, net_obj, steps) {
 	var output = [];
 	var current = init_vect;
@@ -69,6 +77,7 @@ function calcVectTable(init_vect, net_obj, steps) {
 	return output;
 }
 
+// sets population to default 0 for implictly stated dimensions.
 function fillInitVect(net, init_vect) {
 	var output = {};
 	for (var k in init_vect) {
@@ -101,6 +110,7 @@ function petriEvolve(crit_obj, net_obj) {
 	this.intensity = 0.5;
 	this.edge_inten = 0.0;
 	this.trans_inten = 0.0;
+	this.tinc = 0;
 
 	for (var x in crit_obj) {
 		crit_obj[x].initial = fillInitVect(net_obj, crit_obj[x].initial);
@@ -197,13 +207,36 @@ function petriEvolve(crit_obj, net_obj) {
 		return output;
 	}
 
+	this.randomTrans = function() {
+		this.tinc++;
+		var output = {"name": "auto"+this.tinc, "rate":0.01, input:[], output: []};
+		var in_x = Math.floor(Math.random()*3);
+		var out_x = Math.floor(Math.random()*3);
+
+		for (var i = 0; i < in_x; i++) {
+			output.input.push(this.randomState());
+		}
+		for (var i = 0; i < out_x; i++) {
+			output.output.push(this.randomState());
+		}
+
+		return output;
+	}
+
 	this.mutateNetTrans = function(net_obj) {
 		var output = [];
 		var temp;
+		var addrem = Math.random() < 0.5;
 		for (var x in net_obj) {
-			temp = this.copyTransition(net_obj[x]);
-			output.push(temp);
+			output.push(net_obj[x]);
 		}
+
+		if (addrem){
+			output.push(this.randomTrans());
+		} else {
+			output.splice(Math.floor(output.length*Math.random()), 1);
+		}
+
 		return output;
 	}
 
