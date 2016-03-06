@@ -39,6 +39,7 @@ function calcAllNext(current_vect, net_obj) {
 }
 
 function sumStrings(array) {
+	if (!array || array.length == 0) { return ""; }
 	return assoc_fold(array, function (x,y) { return x+y; });
 }
 
@@ -70,20 +71,20 @@ function calcVectTable(init_vect, net_obj, steps) {
 
 function fillInitVect(net, init_vect) {
 	var output = {};
+	for (var k in init_vect) {
+		output[k] = init_vect[k];
+	}
+
 	for (var t in net) {
 		for (var i in net[t].input) {
 			key = net[t].input[i];
-			if (init_vect[key]) {
-				output[key] = init_vect[key];
-			} else {
+			if (!init_vect[key]) {
 				output[key] = 0.0;
 			}
 		}
 		for (var i in net[t].output) {
 			key = net[t].output[i];
-			if (init_vect[key]) {
-				output[key] = init_vect[key];
-			} else {
+			if (!init_vect[key]) {
 				output[key] = 0.0;
 			}
 		}

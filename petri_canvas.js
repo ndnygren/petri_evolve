@@ -134,6 +134,7 @@ function canvasWriter(canvas) {
 			this.last_cursors = [];
 			this.setSizeBasedOnDataSet(table[j], j, table.length);
 			this.drawCurves(table[j], color_obj);
+			if (!crit_obj[j]) {continue;}
 			for (var x in crit_obj[j].criteria) {
 				var t = crit_obj[j].criteria[x];
 				this.drawTarget(t.time, t.quant, t.state);
