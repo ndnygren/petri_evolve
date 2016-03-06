@@ -144,20 +144,56 @@ function petriEvolve(crit_obj, net_obj) {
 
 	this.copyTransition = function(t) {
 		var output = {};
-		for (var x in t) {
-			output[x] = t[x];
+		output.rate = t.rate;
+		output.name = t.name;
+		output.input = [];
+		output.output = [];
+		for (var x in t.input) {
+			output.input[x] = t.input[x];
+		}
+		for (var x in t.output) {
+			output.output[x] = t.output[x];
+		}
+
+		return output;
+	}
+
+	this.stateList = function() {
+		var output = [];
+		for (var i in crit_obj[0].initial) {
+			output.push(i);
 		}
 		return output;
 	}
 
+	this.randomState = function() {
+		if (crit_obj.length == 0) { return "new_state"; }
+		var states = this.stateList();
+		return states[Math.floor(states.length * Math.random()) ];
+	}
 
 	this.mutateNetEdge = function(net_obj) {
 		var output = [];
+		var marked = Math.floor(Math.random()*net_obj.length);
+		var addrem = Math.random() < 0.5;
+		var inout = Math.random() < 0.5;
 		var temp;
 		for (var x in net_obj) {
 			temp = this.copyTransition(net_obj[x]);
+			if (x == marked) {
+				if (inout && addrem) {
+					temp.input.push(this.randomState());
+				} else if (inout && !addrem && temp.input.length > 0) {
+					temp.input.splice(Math.floor(temp.input.length*Math.random()), 1);
+				} else if (!inout && addrem) {
+					temp.output.push(this.randomState());
+				} else if (temp.output.length > 0){
+					temp.output.splice(Math.floor(temp.output.length*Math.random()), 1);
+				}
+			}
 			output.push(temp);
 		}
+
 		return output;
 	}
 
