@@ -8,7 +8,7 @@
 		<script type="text/javascript" src="examples.js"></script>
 		<link href="style.css" rel="stylesheet" type="text/css" />
 		<script type="text/javascript">
-			var net_obj, color_obj, crit_obj;
+			var net_obj, color_obj, crit_obj, stopped;
 
 			function loadExample(idx) {
 				if (!petri_examples[idx]) {
@@ -54,7 +54,7 @@
 				cw_c.loadTable(table_c, color_obj, crit_obj);
 
 
-				if (frame < lambda * gens) {
+				if (frame < lambda * gens && !stopped) {
 					setTimeout(function () {
 						slowAsyncLoop(cw_c, cw_b, ev, frame+1, lambda, gens);
 						}, 1);
@@ -78,7 +78,7 @@
 					= "frame " + frame
 					+ ", MSE: " + ev.best_net.score;
 
-				if (frame < gens) {
+				if (frame < gens && !stopped) {
 					setTimeout(function () {
 						fastAsyncLoop(cw_c, cw_b, ev, frame+1, lambda, gens);
 						}, 1);
@@ -106,6 +106,7 @@
 				ev.trans_inten = document.getElementById("input_trans_inten").value;
 				cw_current.reset();
 				cw_best.reset();
+				stopped = false;
 				if (fast_animate){
 				fastAsyncLoop(cw_current, cw_best, ev, 0,
 						document.getElementById("input_lambda").value,
@@ -185,6 +186,7 @@
 			</table>
 			<button id="slow_button" onclick="start_network_evolve(false);">Slow</button>
 			<button id="fast_button" onclick="start_network_evolve(true);">Fast</button>
+			<button id="stop_button" onclick="stopped=true;">Stop</button>
 		</div>
 		<h2>Progress:</h2>
 		<div id="evolve_div">

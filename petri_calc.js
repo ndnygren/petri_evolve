@@ -229,7 +229,7 @@ function petriEvolve(crit_obj, net_obj) {
 
 	this.randomTrans = function() {
 		this.tinc++;
-		var output = {"name": "auto"+this.tinc, "rate":0.01, input:[], output: []};
+		var output = {"name": "auto"+this.tinc, "rate":0.0001*Math.random(), input:[], output: []};
 		var in_x = Math.floor(Math.random()*3);
 		var out_x = Math.floor(Math.random()*3);
 

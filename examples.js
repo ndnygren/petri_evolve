@@ -155,20 +155,12 @@ petri_examples[2].initial = [
 			{"time":100, "state": "grass", "quant": 0.0},
 			{"time":50, "state": "grass", "quant": 0.0},
 			{"time":100, "state": "rabbit", "quant": 0.0},
+			{"time":20, "state": "rabbit", "quant": 1.0},
 		]
 	}
 ];
 petri_examples[2].colors = {"grass":"green", "rabbit":"gray"};
 
 petri_examples[3].network = [];
-petri_examples[3].initial = [
-	{
-		"initial":{"rabbit":10.0},
-		"criteria": [
-			{"time":100, "state": "grass", "quant": 0.0},
-			{"time":50, "state": "grass", "quant": 0.0},
-			{"time":100, "state": "rabbit", "quant": 0.0},
-		]
-	}
-];
-petri_examples[3].colors = {"rabbit":"gray"};
+petri_examples[3].initial = petri_examples[2].initial;
+petri_examples[3].colors = petri_examples[2].colors;
