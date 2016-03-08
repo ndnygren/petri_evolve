@@ -41,16 +41,18 @@
 
 			function slowAsyncLoop(cw_c, cw_b, ev, frame, lambda, gens) {
 				if (frame % lambda == 0) {
-					var table = ev.calcTable(ev.bestInSet(ev.ls));
+					var table = ev.bestInSet().table;
 					ev.makeLambdaSet(lambda);
 					cw_b.loadTable(table, color_obj, crit_obj);
 				}
-				var table_c = ev.calcTable(ev.ls[frame % lambda]);
+
+				var table_c = ev.table(frame % lambda);
+				var current_score = ev.eval(frame % lambda);
+				document.getElementById("output_div").innerHTML
+					= "frame " + frame + ", current: " + current_score
+					+ ", MSE: " + ev.best_net.score;
 				cw_c.loadTable(table_c, color_obj, crit_obj);
 
-				document.getElementById("output_div").innerHTML
-					= "frame " + frame
-					+ ", MSE: " + ev.evalTable(ev.calcTable(ev.best_net));
 
 				if (frame < lambda * gens) {
 					setTimeout(function () {
@@ -61,19 +63,20 @@
 				document.getElementById("fast_button").disabled=false;
 					document.getElementById("output_div").innerHTML
 						+= "<h3>Proposed Changes</h3>"
-						+"<textarea id=\"evo_result_text\" disabled=true>" + JSON.stringify(ev.best_net, null, "\t") + "</textarea>"
+						+"<textarea id=\"evo_result_text\" disabled=true>" + JSON.stringify(ev.best_net.net, null, "\t") + "</textarea>"
 						+ "<button onclick='copyResultToInit()'>Accept</button>";
 				}
 			}
 
 			function fastAsyncLoop(cw_c, cw_b, ev, frame, lambda, gens) {
 				ev.makeLambdaSet(lambda);
-				var table = ev.calcTable(ev.bestInSet(ev.ls));
+				ev.bestInSet();
+				var table = ev.bestTable();
 				cw_b.loadTable(table, color_obj, crit_obj);
 
 				document.getElementById("output_div").innerHTML
 					= "frame " + frame
-					+ ", MSE: " + ev.evalTable(table);
+					+ ", MSE: " + ev.best_net.score;
 
 				if (frame < gens) {
 					setTimeout(function () {
@@ -85,7 +88,7 @@
 					document.getElementById("output_div").innerHTML
 						+= "<h3>Proposed Changes</h3>"
 						+"<textarea id=\"evo_result_text\" disabled=true>"
-						+ JSON.stringify(ev.best_net, null, "\t")
+						+ JSON.stringify(ev.best_net.net, null, "\t")
 						+ "</textarea>"
 						+ "<button onclick='copyResultToInit()'>Accept</button>";
 				}

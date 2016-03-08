@@ -102,9 +102,7 @@ function fillInitVect(net, init_vect) {
 }
 
 function petriEvolve(crit_obj, net_obj) {
-	this.net_obj = net_obj;
 	this.crit_obj = crit_obj;
-	this.best_net = net_obj;
 	this.ls = [];
 	this.freq = 0.9;
 	this.intensity = 0.5;
@@ -131,8 +129,30 @@ function petriEvolve(crit_obj, net_obj) {
 		return output;
 	}
 
+	this.makeEvalCache = function() {
+		var temp;
+		for (var x in this.ls) {
+			this.ls[x].table = this.calcTable(this.ls[x].net);
+			this.ls[x].score = this.evalTable(this.ls[x].table);
+		}
+	}
+
+	this.eval = function(idx) {
+		if (idx < 0 || idx >= this.ls.length) {
+			throw("Index out of range ("+idx+" of " + this.ls.length + ").");
+		}
+		return this.ls[idx].score;
+	}
+
+	this.table = function(idx){
+		if (idx < 0 || idx >= this.ls.length) {
+			throw("Index out of range ("+idx+" of " + this.ls.length + ").");
+		}
+		return this.ls[idx].table;
+	}
+
 	this.bestTable = function() {
-		return this.calcTable(this.best_net);
+		return this.best_net.table;
 	}
 
 	this.evalTable = function(table) {
@@ -257,11 +277,12 @@ function petriEvolve(crit_obj, net_obj) {
 		return output;
 	}
 
-	this.bestInSet = function(list) {
-		var b_so_far = this.evalTable(this.bestTable());
+	this.bestInSet = function() {
+		var list = this.ls;
+		var b_so_far = this.best_net.score;
 		var next;
 		for (var x in list) {
-			next = this.evalTable(this.calcTable(list[x]));
+			next = this.eval(x);
 			if (next < b_so_far) {
 				b_so_far = next;
 				this.best_net = list[x];
@@ -274,18 +295,21 @@ function petriEvolve(crit_obj, net_obj) {
 		var output = [];
 		var temp;
 		for (var i = 0; i < lambda; i++) {
-			temp = this.best_net;
+			temp = this.best_net.net;
 			if (Math.random() < this.edge_inten) {
 				temp = this.mutateNetEdge(temp);
 			}
 			if (Math.random() < this.trans_inten) {
 				temp = this.mutateNetTrans(temp);
 			}
-			output.push(this.mutateNetRates(temp));
+			output.push({"net":this.mutateNetRates(temp)});
 		}
 		output.push(this.best_net);
 		this.ls = output;
+		this.makeEvalCache();
 		return output;
 	}
+
+	this.best_net = {"net":net_obj, "table":this.calcTable(net_obj), "score":this.evalTable(this.calcTable(net_obj))};
 }
 
