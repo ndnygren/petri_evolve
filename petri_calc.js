@@ -291,11 +291,50 @@ function petriEvolve(crit_obj, net_obj) {
 		return this.best_net;
 	}
 
+	this.invertScore = function(input) {
+		return 1.0/Math.max(input, 0.0025);
+	}
+
+	this.rouletteMess = function(lambda) {
+		var cummu = [0.0];
+		var output = [];
+		var total = 0.0;
+
+		var target,high,low;
+		if (this.ls.length == 0) { this.ls = [this.best_net]; }
+
+		for (var x in this.ls) {
+			if (x == 0) {
+				cummu.push(this.invertScore(this.ls[x].score));
+			} else {
+				cummu.push(this.invertScore(this.ls[x].score) + cummu[x-1]);
+			}
+			total += this.invertScore(this.ls[x].score);
+		}
+
+		for (var x = 0; x < lambda; x++) {
+			target = Math.random()*total;
+			low = 0;
+			high = this.ls.length;
+			while (high - low > 1) {
+				if (cummu[Math.floor((high + low)/2)] < target) {
+					low = Math.floor((high + low)/2);
+				} else {
+					high = Math.floor((high + low)/2);
+				}
+			}
+			output.push(this.ls[low].net);
+		}
+
+		return output;
+	}
+
 	this.makeLambdaSet = function(lambda) {
 		var output = [];
 		var temp;
+		var rm = this.rouletteMess(lambda);
 		for (var i = 0; i < lambda; i++) {
-			temp = this.best_net.net;
+			temp =  rm[i]; //this.best_net.net;
 			if (Math.random() < this.edge_inten) {
 				temp = this.mutateNetEdge(temp);
 			}
