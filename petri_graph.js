@@ -600,6 +600,39 @@ SPGGrouper.prototype.intifyArray = function(arr)
 	return output;
 }
 
+SPGGrouper.prototype.ioTripleSort = function(a,b) {
+	if (a[0] < b[0] || (a[0]==b[0] &&  a[1] < b[1])) { return -1; }
+	else if (a[0]==b[0] && a[1]==b[1]) { return 0; }
+	else { return 1; }
+}
+
+SPGGrouper.prototype.mergeEdgeCounts = function(net_def) {
+	spgg = this;
+	net_def.i.sort(spgg.ioTripleSort);
+	net_def.o.sort(spgg.ioTripleSort);
+	var temp = [];
+	var output = {"i":[], "o":[]};
+	for (var i = 0; i < net_def.i.length; i++) {
+		if (i == 0 || spgg.ioTripleSort(net_def.i[i-1], net_def.i[i]) != 0) {
+			temp.push(net_def.i[i]);
+		} else {
+			temp[temp.length-1][2] += net_def.i[i][2];
+		}
+	}
+	output.i = temp;
+	temp = [];
+	for (var i = 0; i < net_def.o.length; i++) {
+		if (i == 0 || spgg.ioTripleSort(net_def.o[i-1], net_def.o[i]) != 0) {
+			temp.push(net_def.o[i]);
+		} else {
+			temp[temp.length-1][2] += net_def.o[i][2];
+		}
+	}
+	output.o = temp;
+
+	return output;
+}
+
 // breaks the input, line-by-line and parses each separately
 // divides into 2 definitions (arrays), input and output
 SPGGrouper.prototype.readCommand = function(net_obj)
@@ -617,7 +650,8 @@ SPGGrouper.prototype.readCommand = function(net_obj)
 		}
 	}
 
-	return output;
+
+	return this.mergeEdgeCounts(output);
 }
 
 // looks at input and output definitions and collects unique lists
