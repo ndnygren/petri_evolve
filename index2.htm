@@ -11,11 +11,16 @@
 			function readPetriInput()
 {
 				var formstring = document.getElementById("network_input").value;
-				var net_obj, last;
+				var net_obj, last, crit_obj;
 				try{
 					net_obj = JSON.parse(formstring);
 				} catch (e) {
 					throw("Could not read network input.");
+				}
+				try{
+					crit_obj = JSON.parse(document.getElementById("initial_input").value);
+				} catch (e) {
+					throw("Could not read criteria input.");
 				}
 				var spgg = new SPGGrouper();
 				var commands = spgg.readCommand(net_obj);
@@ -25,6 +30,8 @@
 				var output = "";
 				var fact = new petriSVGfact();
 				var comb = new SPGParNode(null, null);
+				var namedpoints;
+
 				/*
 				output += JSON.stringify(commands, null, 2);
 				output += "<br/> states:" + JSON.stringify(stateList(commands));
@@ -46,7 +53,9 @@
 
 				output += "xy:" + JSON.stringify(last) + "</br>";
 				//output += "<br/> " + JSON.stringify(withNameAndType(last, commands));
-				output += fact.make(spgg.withNameAndType(last, commands), commands);
+				namedpoints = spgg.withNameAndType(last, commands);
+				spgg.disjointNodes(net_obj, crit_obj, namedpoints);
+				output += fact.make( spgg.disjointNodes(net_obj, crit_obj, namedpoints), commands);
 				document.getElementById("output_box").innerHTML = output;
 			}
 			</script>
@@ -56,17 +65,36 @@
 		<h1>Petri Diag Sandbox</h1>
 		<h2>Net Definition:</h2>
 		<div id="main_content_div">
-			Enter network definition:
-			<textarea id="network_input">[ { "name": "seep", "input": [], "output": ["water"], "rate": 1 },
+			<table>
+				<tr>
+					<td>Enter network definition:</td>
+					<td>
+						<textarea id="network_input">
+				[ { "name": "seep", "input": [], "output": ["water"], "rate": 1 },
 				{ "name": "pool", "input": ["water"], "output": [], "rate": 1 },
 				{ "name": "grow", "input": ["grass","water","soil"], "output": [ "grass","grass" ], "rate": 1 },
 				{ "name": "die", "input": ["grass"], "output": ["soil"], "rate": 1 }
 			]
-			</textarea>
+					       	</textarea>
+					</td>
+				</tr>
+				<tr>
+					<td>Enter initial settings:</td>
+					<td>
+						<textarea id="initial_input">[ { "initial":{"heat":50.0}, "criteria": [{"time":100, "state": "heat", "quant": 20.0}, {"time":20, "state": "heat", "quant": 30.0}, {"time":80, "state": "heat", "quant": 20.0}] }]</textarea>
+					</td>
+				</tr>
+				<tr>
+					<td>Enter colors:</td>
+					<td>
+						<textarea id="colors_input"> {} </textarea>
+					</td>
+				</tr>
+			</table>
 			<button onclick="readPetriInput()">Load</button>
 		</div>
 		<h2>Output:</h2>
-		<div id="output_box">
+		<div id="output_box"></div>
 	</body>
 </html>
 

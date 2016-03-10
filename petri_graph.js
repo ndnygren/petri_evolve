@@ -184,6 +184,55 @@ function SPGDebug(serlist)
 }
 
 function SPGGrouper() {
+	this.transListFromNet = function(net_obj) {
+		return net_obj.map(function (x) { return x.name; });
+	}
+
+	this.stateListFromEdge = function(commands){
+		return commands.i.map(function (x) { return x[0]; }).concat(commands.o.map(function (x) { return x[0]; }));
+	}
+
+	this.transListFromEdge = function(commands){
+		return commands.i.map(function (x) { return x[1]; }).concat(commands.o.map(function (x) { return x[1]; }));
+	}
+
+	this.stateListFromCrit = function(crit_obj){
+		var output = [];
+		for (var s in crit_obj) {
+			for (var k in crit_obj[s].initial) {output.push(k);}
+			output = output.concat(crit_obj[s].criteria.map(function(x) { return x.state; }));
+		}
+		return output;
+	}
+
+	this.uniqueDiff = function(arr1,arr2) {
+		var output = arr1.filter(function(x) { return arr2.indexOf(x) < 0; });
+		var output2 = [];
+
+		for (var i in output) {
+			if (output2.indexOf(output[i]) < 0){
+				output2.push(output[i]);
+			}
+		}
+
+		return output2;
+	}
+
+	this.disjointNodes = function(net_obj, crit_obj, named) {
+		var commands = this.readCommand(net_obj);
+		var loose_t = this.uniqueDiff(this.transListFromNet(net_obj), this.transListFromEdge(commands));
+		var loose_s = this.uniqueDiff(this.stateListFromCrit(crit_obj), this.stateListFromEdge(commands));
+		var high = Math.max.apply(null, named.map(function(x) { return x.y; }));
+		var maxid = Math.max.apply(null, named.map(function(x) { return x.name; }));
+		var output = named.map(function (x) { return x; });
+		for (var i in loose_t) {
+			output.push({"name":++maxid,"x":parseInt(i)+1,"y":high+1,"display":loose_t[i],"type":"trans"});
+		}
+		for (var i in loose_s) {
+			output.push({"name":++maxid,"x":loose_t.length+parseInt(i)+1,"y":high+1,"display":loose_s[i],"type":"state"});
+		}
+		return output;
+	}
 }
 
 SPGGrouper.prototype.numPairToSeries = function (lhs,rhs)
