@@ -224,6 +224,9 @@ function SPGGrouper() {
 		var loose_s = this.uniqueDiff(this.stateListFromCrit(crit_obj), this.stateListFromEdge(commands));
 		var high = Math.max.apply(null, named.map(function(x) { return x.y; }));
 		var maxid = Math.max.apply(null, named.map(function(x) { return x.name; }));
+		if (high == null || !isFinite(high)) { high = -0.5; }
+		if (maxid == null || !isFinite(maxid)) { maxid = 1; }
+
 		var output = named.map(function (x) { return x; });
 		for (var i in loose_t) {
 			output.push({"name":++maxid,"x":parseInt(i)+1,"y":high+1,"display":loose_t[i],"type":"trans"});
@@ -1008,6 +1011,7 @@ function petriSVGfact()
 	{
 		var output = "";
 		this.radius = 10;
+		if (xy.length == 0) {return this.svgtop(3, 1) + "</svg>\n";}
 		this.tsize.w = 4*this.xoffs + this.mult * Math.max.apply(null, xy.map(function (x) {return x.x;}));
 		this.tsize.h = 4*this.yoffs + this.mult * Math.max.apply(null, xy.map(function (x) {return x.y;}));
 		output += this.svgtop(this.tsize.w, this.tsize.h);
