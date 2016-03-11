@@ -1017,5 +1017,20 @@ function petriSVGfact()
 
 		return output + "</svg>\n";
 	}
+
+	this.makeWithDisjoint = function(net_obj, crit_obj) {
+		var spgg = new SPGGrouper();
+		var commands = spgg.readCommand(net_obj);
+		var mtx = spgg.toStateTransMtx(commands);
+		var serlist = spgg.mtxToSerList(mtx);
+		var comb = new SPGParNode(null, null);
+		var namedpoints;
+
+		comb.data = spgg.mergeAllPar(serlist);
+		comb.data = spgg.mergeAllLone(comb.data);
+
+		namedpoints = spgg.withNameAndType(spgg.serNodeToXY(comb), commands);
+		return this.make( spgg.disjointNodes(net_obj, crit_obj, namedpoints), commands);
+	}
 }
 

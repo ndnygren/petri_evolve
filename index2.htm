@@ -22,40 +22,10 @@
 				} catch (e) {
 					throw("Could not read criteria input.");
 				}
-				var spgg = new SPGGrouper();
-				var commands = spgg.readCommand(net_obj);
-				var mtx = spgg.toStateTransMtx(commands);
-				var serlist = spgg.mtxToSerList(mtx);
-				var shorted = spgg.removeAll2ndOrder(serlist);
-				var output = "";
 				var fact = new petriSVGfact();
-				var comb = new SPGParNode(null, null);
-				var namedpoints;
+				var output = "";
 
-				/*
-				output += JSON.stringify(commands, null, 2);
-				output += "<br/> states:" + JSON.stringify(stateList(commands));
-				output += "<br/> transistions:" + JSON.stringify(transList(commands));
-				output += "<br/> idx:" + JSON.stringify(StateTransCommonIdx(stateList(commands), transList(commands)));
-				output += "<br/> transistions:" + JSON.stringify(toStateTransMtx(commands));
-				output += "<br/> serList:" + JSON.stringify(serlist);
-				output += "<br/> counts:" + JSON.stringify(countNodeOrders(serlist));
-				output += "<br/> new serlist:" + JSON.stringify(findAndRemove2ndOrderNode(serlist));
-				output += "<br/> shortened:" + JSON.stringify(shorted);
-				*/
-				spgg.normalizeAndSortSerList(shorted);
-				//output += "<br/> shortened:" + JSON.stringify(shorted);
-				//output += "<br/> parmerge:" + JSON.stringify(mergeAllPar(serlist));
-				comb.data = spgg.mergeAllPar(serlist);
-				comb.data = spgg.mergeAllLone(comb.data);
-				//output += "<br/>classify leaves: " + SPGDebug(comb.data);
-				last = spgg.serNodeToXY(comb);
-
-				output += "xy:" + JSON.stringify(last) + "</br>";
-				//output += "<br/> " + JSON.stringify(withNameAndType(last, commands));
-				namedpoints = spgg.withNameAndType(last, commands);
-				spgg.disjointNodes(net_obj, crit_obj, namedpoints);
-				output += fact.make( spgg.disjointNodes(net_obj, crit_obj, namedpoints), commands);
+				output += fact.makeWithDisjoint(net_obj, crit_obj);
 				document.getElementById("output_box").innerHTML = output;
 			}
 			</script>
