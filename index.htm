@@ -1,7 +1,8 @@
-
 <!DOCTYPE HTML>
 <html>
 	<head>
+		<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+		<meta content="utf-8" http-equiv="encoding">
 		<title>Petri Calc Sandbox</title>
 		<script type="text/javascript" src="petri_calc.js"></script>
 		<script type="text/javascript" src="petri_canvas.js"></script>
@@ -66,7 +67,8 @@
 					document.getElementById("output_div").innerHTML
 						+= "<h3>Proposed Changes</h3>"
 						+"<textarea id=\"evo_result_text\" disabled=true>" + JSON.stringify(ev.best_net.net, null, "\t") + "</textarea>"
-						+ "<button onclick='copyResultToInit()'>Accept</button>";
+						+ "<button onclick='copyResultToInit()'>Accept</button>"
+						+ "<a href='data:text/plain," + encodeURI(JSON.stringify(ev.log)) + "'>log</a>";
 				}
 			}
 
@@ -93,7 +95,9 @@
 						+"<textarea id=\"evo_result_text\" disabled=true>"
 						+ JSON.stringify(best.net, null, "\t")
 						+ "</textarea>"
-						+ "<button onclick='copyResultToInit()'>Accept</button></br>" + fact.makeWithDisjoint(best.net, crit_obj);
+						+ "<button onclick='copyResultToInit()'>Accept</button></br>"
+						+ "<a href='data:text/plain," + encodeURI(JSON.stringify(ev.log)) + "'>log</a>"
+						+ fact.makeWithDisjoint(best.net, crit_obj);
 				}
 			}
 			function start_network_evolve(fast_animate) {
@@ -126,7 +130,7 @@
 		<h1>Petri Calc Sandbox</h1>
 		<h2>Net Definition:</h2>
 		<div id="main_content_div" class="outer_div">
-			<div id="inner_div">
+			<div class="inner_div">
 			<table>
 				<tr>
 					<td>Enter network definition:</td>
@@ -160,7 +164,7 @@
 			</div>
 		</div>
 		<h2>Preview:</h2>
-		<div id="outer_div">
+		<div class="outer_div">
 			<div class="inner_div">
 				<canvas width=400 height=400 id="chart_canvas"></canvas>
 			</div>

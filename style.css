@@ -24,7 +24,7 @@ div {
 }
 
 .outer_div {
-	display:table-cell;
+	display:table;
 }
 
 .inner_div {

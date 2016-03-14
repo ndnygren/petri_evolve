@@ -109,6 +109,7 @@ function petriEvolve(crit_obj, net_obj) {
 	this.edge_inten = 0.0;
 	this.trans_inten = 0.0;
 	this.tinc = 0;
+	this.log = [];
 
 	for (var x in crit_obj) {
 		crit_obj[x].initial = fillInitVect(net_obj, crit_obj[x].initial);
@@ -174,6 +175,7 @@ function petriEvolve(crit_obj, net_obj) {
 
 	this.copyTransition = function(t) {
 		return JSON.parse(JSON.stringify(t));
+/*
 		var output = {};
 		output.rate = t.rate;
 		output.name = t.name;
@@ -187,6 +189,7 @@ function petriEvolve(crit_obj, net_obj) {
 		}
 
 		return output;
+	*/
 	}
 
 	this.copyNet = function(net_obj) {
@@ -284,14 +287,12 @@ function petriEvolve(crit_obj, net_obj) {
 	}
 
 	this.bestInSet = function() {
-		var list = this.ls;
 		var b_so_far = this.best_net.score;
-		var next;
-		for (var x in list) {
-			next = this.eval(x);
-			if (next < b_so_far) {
-				b_so_far = next;
-				this.best_net = list[x];
+		for (var x in this.ls) {
+			if (this.ls[x].score < b_so_far) {
+				b_so_far = this.ls[x].score;
+				this.best_net = this.ls[x];
+				this.log.push(JSON.stringify({"net": this.ls[x].net, "score": this.ls[x].score}));
 			}
 		}
 
