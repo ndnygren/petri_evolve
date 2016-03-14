@@ -33,14 +33,12 @@
 				try { color_obj = JSON.parse(document.getElementById("colors_input").value); }
 				catch (e) { alert("failed to parse color values."); }
 				var fact = new petriSVGfact();
-				document.getElementById("graph_div").innerHTML = fact.makeWithDisjoint(net_obj, crit_obj);
-				var table = calcVectTable(
-						fillInitVect(net_obj, crit_obj && crit_obj[0] ? crit_obj[0].initial : {}),
-						net_obj,150);
-				document.getElementById("output_div").innerHTML = vectTableToHTML(table);
+				var ev = new petriEvolve(crit_obj, net_obj);
+				document.getElementById("graph_div").innerHTML = fact.makeWithDisjoint(net_obj, crit_obj)
+					+ "<span>MSE: " + ev.best_net.score+"</span>";
+				document.getElementById("output_div").innerHTML = vectTableToHTML(ev.best_net.table[0] || []);
 				var cw = new canvasWriter(document.getElementById("chart_canvas"));
-				cw.loadTable([table], color_obj, [crit_obj[0]]);
-				document.getElementById("graph_div").innerHTML = fact.makeWithDisjoint(net_obj, crit_obj);
+				cw.loadTable(ev.best_net.table, color_obj, crit_obj);
 			}
 
 			function slowAsyncLoop(cw_c, cw_b, ev, frame, lambda, gens) {
@@ -74,13 +72,12 @@
 
 			function fastAsyncLoop(cw_c, cw_b, ev, frame, lambda, gens) {
 				ev.makeLambdaSet(lambda);
-				ev.bestInSet();
-				var table = ev.bestTable();
-				cw_b.loadTable(table, color_obj, crit_obj);
+				var best = ev.bestInSet();
+				cw_b.loadTable(best.table, color_obj, crit_obj);
 
 				document.getElementById("output_div").innerHTML
 					= "frame " + frame
-					+ ", MSE: " + ev.best_net.score;
+					+ ", MSE: " + best.score;
 
 				if (frame < gens && !stopped) {
 					setTimeout(function () {
@@ -92,7 +89,7 @@
 					document.getElementById("output_div").innerHTML
 						+= "<h3>Proposed Changes</h3>"
 						+"<textarea id=\"evo_result_text\" disabled=true>"
-						+ JSON.stringify(ev.best_net.net, null, "\t")
+						+ JSON.stringify(best.net, null, "\t")
 						+ "</textarea>"
 						+ "<button onclick='copyResultToInit()'>Accept</button>";
 				}
@@ -163,7 +160,7 @@
 		<h2>Preview:</h2>
 		<div id="outer_div">
 			<div class="inner_div">
-				<canvas id="chart_canvas"></canvas>
+				<canvas width=400 height=400 id="chart_canvas"></canvas>
 			</div>
 			<div class="inner_div" id="graph_div"></div>
 		</div>
@@ -203,8 +200,8 @@
 			<table>
 				<tr><th>current</th><th>best</th></tr>
 				<tr>
-					<td><canvas width=400 height=300 id="current_canvas"></canvas></td>
-					<td><canvas width=400 height=300 id="best_canvas"></canvas></td>
+					<td><canvas width=400 height=400 id="current_canvas"></canvas></td>
+					<td><canvas width=400 height=400 id="best_canvas"></canvas></td>
 				</tr>
 			</table>
 		</div>

@@ -188,6 +188,11 @@ function petriEvolve(crit_obj, net_obj) {
 		return output;
 	}
 
+	this.copyNet = function(net_obj) {
+		var ev = this;
+		return net_obj.map(function(x) { return ev.copyTransition(x); });
+	}
+
 	this.stateList = function() {
 		var output = [];
 		for (var i in crit_obj[0].initial) {
@@ -209,7 +214,7 @@ function petriEvolve(crit_obj, net_obj) {
 		var inout = Math.random() < 0.5;
 		var temp;
 		for (var x in net_obj) {
-			temp = this.copyTransition(net_obj[x]);
+			temp = net_obj[x];
 			if (x == marked) {
 				if (inout && addrem) {
 					temp.input.push(this.randomState());
@@ -267,7 +272,7 @@ function petriEvolve(crit_obj, net_obj) {
 		var temp;
 
 		for (var x in net_obj) {
-			temp = this.copyTransition(net_obj[x]);
+			temp = net_obj[x];
 			if (Math.random() < freq) {
 				temp.rate *= 1 + Math.max((Math.random() - 0.5) * intensity, -0.99);
 			}
@@ -288,7 +293,19 @@ function petriEvolve(crit_obj, net_obj) {
 				this.best_net = list[x];
 			}
 		}
+		this.assertTriple(this.best_net);
 		return this.best_net;
+	}
+
+	this.assertTriple = function(obj) {
+		var table = this.calcTable(obj.net);
+		if (obj.score != this.evalTable(table)) {
+			throw("bad triple: changed somewhere");
+		}
+		else {
+			console.log("good triple: " + obj.score);
+		}
+
 	}
 
 	this.invertScore = function(input) {
@@ -323,7 +340,7 @@ function petriEvolve(crit_obj, net_obj) {
 					high = Math.floor((high + low)/2);
 				}
 			}
-			output.push(this.ls[low].net);
+			output.push(this.copyNet(this.ls[low].net));
 		}
 
 		return output;
@@ -343,7 +360,7 @@ function petriEvolve(crit_obj, net_obj) {
 			}
 			output.push({"net":this.mutateNetRates(temp)});
 		}
-		output.push(this.best_net);
+		output.push({"net":this.copyNet(this.best_net.net)});
 		this.ls = output;
 		this.makeEvalCache();
 		return output;
