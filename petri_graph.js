@@ -543,7 +543,7 @@ SPGGrouper.prototype.mergeLeafs = function(found, newid, list)
 SPGGrouper.prototype.maxNodeId = function(serlist)
 {
 	var output = 0;
-	for (i = 0; i < serlist.length; i++)
+	for (var i = 0; i < serlist.length; i++)
 	{
 		output = Math.max(serlist[i].maxID(), output);
 	}
