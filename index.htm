@@ -73,6 +73,7 @@
 			function fastAsyncLoop(cw_c, cw_b, ev, frame, lambda, gens) {
 				ev.makeLambdaSet(lambda);
 				var best = ev.bestInSet();
+				new petriEvolve(crit_obj,net_obj).assertTriple(best);
 				cw_b.loadTable(best.table, color_obj, crit_obj);
 
 				document.getElementById("output_div").innerHTML
@@ -84,6 +85,7 @@
 						fastAsyncLoop(cw_c, cw_b, ev, frame+1, lambda, gens);
 						}, 1);
 				} else {
+					var fact = new petriSVGfact();
 					document.getElementById("slow_button").disabled=false;
 					document.getElementById("fast_button").disabled=false;
 					document.getElementById("output_div").innerHTML
@@ -91,7 +93,7 @@
 						+"<textarea id=\"evo_result_text\" disabled=true>"
 						+ JSON.stringify(best.net, null, "\t")
 						+ "</textarea>"
-						+ "<button onclick='copyResultToInit()'>Accept</button>";
+						+ "<button onclick='copyResultToInit()'>Accept</button></br>" + fact.makeWithDisjoint(best.net, crit_obj);
 				}
 			}
 			function start_network_evolve(fast_animate) {

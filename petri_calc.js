@@ -173,6 +173,7 @@ function petriEvolve(crit_obj, net_obj) {
 }
 
 	this.copyTransition = function(t) {
+		return JSON.parse(JSON.stringify(t));
 		var output = {};
 		output.rate = t.rate;
 		output.name = t.name;
@@ -293,7 +294,7 @@ function petriEvolve(crit_obj, net_obj) {
 				this.best_net = list[x];
 			}
 		}
-		this.assertTriple(this.best_net);
+
 		return this.best_net;
 	}
 
