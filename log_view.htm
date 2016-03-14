@@ -1,0 +1,94 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+		<meta content="utf-8" http-equiv="encoding">
+		<title>Petri Calc Log Viewer</title>
+		<script type="text/javascript" src="petri_calc.js"></script>
+		<script type="text/javascript" src="petri_canvas.js"></script>
+		<script type="text/javascript" src="petri_graph.js"></script>
+		<script type="text/javascript" src="examples.js"></script>
+		<link href="style.css" rel="stylesheet" type="text/css" />
+		<script type="text/javascript">
+			var net_obj, color_obj, crit_obj, stopped;
+
+			function loadExample(idx) {
+				if (!petri_examples[idx]) {
+					throw("Bad index ("+idx+") for examples.");
+				}
+				document.getElementById("network_input").value = JSON.stringify(petri_examples[idx].network, null, "\t");
+				document.getElementById("initial_input").value = JSON.stringify(petri_examples[idx].initial, null, "\t");
+				document.getElementById("colors_input").value = JSON.stringify(petri_examples[idx].colors, null, "\t");
+			}
+
+			function load_network_def() {
+				try {
+					net_obj = JSON.parse(document.getElementById("network_input").value);
+					net_obj = net_obj.map(function(x) { return JSON.parse(x); });
+				 }
+				catch (e) { alert("failed to parse network defintion."); }
+				try { crit_obj = JSON.parse(document.getElementById("initial_input").value); }
+				catch (e) { alert("failed to parse initial values."); }
+				try { color_obj = JSON.parse(document.getElementById("colors_input").value); }
+				catch (e) { alert("failed to parse color values."); }
+				var logidx = document.getElementById("idx_input").value;
+				var fact = new petriSVGfact();
+				var ev = new petriEvolve(crit_obj, net_obj[logidx].net);
+				document.getElementById("output_div").innerHTML = vectTableToHTML(ev.best_net.table[0] || []);
+				document.getElementById("output_div").innerHTML = JSON.stringify(ev.best_net.net);
+				var cw = new canvasWriter(document.getElementById("chart_canvas"));
+				cw.loadTable(ev.best_net.table, color_obj, crit_obj);
+			}
+
+		</script>
+	</head>
+	<body>
+		<h1>Petri Calc Log Viewer</h1>
+		<h2>Net Definition:</h2>
+		<div id="main_content_div" class="outer_div">
+			<div class="inner_div">
+			<table>
+				<tr>
+					<td>Enter Evolution Log:</td>
+					<td>
+						<textarea id="network_input"> [ ] </textarea>
+					</td>
+				</tr>
+				<tr>
+					<td>Enter initial settings:</td>
+					<td>
+						<textarea id="initial_input"> [ ] </textarea>
+					</td>
+				</tr>
+				<tr>
+					<td>Enter colors:</td>
+					<td>
+						<textarea id="colors_input"> {} </textarea>
+					</td>
+				</tr>
+			</table>
+			</div>
+			<div class="inner_div">
+			<h3>Load Examples</h3>
+			<ul class="clicky_menu_list">
+				<li onclick="loadExample(0)">Example 1(Heat)</li>
+				<li onclick="loadExample(1)">Example 2(Yeast)</li>
+				<li onclick="loadExample(2)">Example 3(Grass)</li>
+				<li onclick="loadExample(3)">Example 4(blank)</li>
+			</ul>
+			<input id="idx_input" type="number" value="0" />
+			<button onclick="load_network_def();">Load</button>
+			</div>
+		</div>
+		<h2>Preview:</h2>
+		<div class="outer_div">
+			<div class="inner_div">
+				<canvas width=400 height=400 id="chart_canvas"></canvas>
+			</div>
+			<div class="inner_div" id="graph_div"></div>
+		</div>
+		<h2>Output:</h2>
+		<div id="output_div"></div>
+	</body>
+
+</html>
