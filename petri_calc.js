@@ -77,6 +77,20 @@ function calcVectTable(init_vect, net_obj, steps) {
 	return output;
 }
 
+function findAllImplied(crit_obj) {
+	var output = {};
+	for (var j in crit_obj) {
+		for (var i in crit_obj[j].initial) {
+			output[i] = true;
+		}
+		for (var q in crit_obj[j].criteria) {
+			output[crit_obj[j].criteria[q].state] = true;
+		}
+	}
+
+	return Object.keys(output);
+}
+
 // sets population to default 0 for implictly stated dimensions.
 function fillInitVect(net, init_vect) {
 	var output = {};
@@ -111,8 +125,15 @@ function petriEvolve(crit_obj, net_obj) {
 	this.tinc = 0;
 	this.log = [];
 
+	var implied = findAllImplied(crit_obj);
+
 	for (var x in crit_obj) {
-		crit_obj[x].initial = fillInitVect(net_obj, crit_obj[x].initial);
+		this.crit_obj[x].initial = fillInitVect(net_obj, this.crit_obj[x].initial);
+		for (var y in implied) {
+			if (!this.crit_obj[x].initial[implied[y]]) {
+				this.crit_obj[x].initial[implied[y]] = 0.0;
+			}
+		}
 	}
 
 	this.calcTable = function(net) {
@@ -304,10 +325,6 @@ function petriEvolve(crit_obj, net_obj) {
 		if (obj.score != this.evalTable(table)) {
 			throw("bad triple: changed somewhere");
 		}
-		else {
-			console.log("good triple: " + obj.score);
-		}
-
 	}
 
 	this.invertScore = function(input) {

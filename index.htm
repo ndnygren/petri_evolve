@@ -75,7 +75,6 @@
 			function fastAsyncLoop(cw_c, cw_b, ev, frame, lambda, gens) {
 				ev.makeLambdaSet(lambda);
 				var best = ev.bestInSet();
-				new petriEvolve(crit_obj,net_obj).assertTriple(best);
 				cw_b.loadTable(best.table, color_obj, crit_obj);
 
 				document.getElementById("output_div").innerHTML
