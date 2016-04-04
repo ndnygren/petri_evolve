@@ -1,4 +1,5 @@
 
+// Leaf node class in a serial parallel graph
 function SPGLeafNode (input)
 {
 	this.data = input;
@@ -16,6 +17,7 @@ function SPGLeafNode (input)
 	this.maxID = function() { return this.data; }
 }
 
+// Serial node class in a serial parallel graph
 function SPGSeriesNode(lhs, rhs)
 {
 	this.data = [];
@@ -104,6 +106,7 @@ function SPGSeriesNode(lhs, rhs)
 	}
 }
 
+// Parallel node class in a serial parallel graph
 function SPGParNode(lhs, rhs)
 {
 	this.data = [];
@@ -171,6 +174,7 @@ function SPGParNode(lhs, rhs)
 	}
 }
 
+// Debugging output format, to be removed
 function SPGDebug(serlist)
 {
 	if (!serlist) { return 0; }
@@ -183,19 +187,29 @@ function SPGDebug(serlist)
 	return output + "]";
 }
 
+// Class for collecting and organizing static functions
+// Specifically Serial Parallel Graph drawing functions
 function SPGGrouper() {
+	// generates the list of names of transitions
+	// from the transition-list formatted petri-net
 	this.transListFromNet = function(net_obj) {
 		return net_obj.map(function (x) { return x.name; });
 	}
 
+	// generates the list of names of states
+	// from the semi-converted format
 	this.stateListFromEdge = function(commands){
 		return commands.i.map(function (x) { return x[0]; }).concat(commands.o.map(function (x) { return x[0]; }));
 	}
 
+	// generates the list of names of transitions
+	// from the semi-converted format
 	this.transListFromEdge = function(commands){
 		return commands.i.map(function (x) { return x[1]; }).concat(commands.o.map(function (x) { return x[1]; }));
 	}
 
+	// generates the list of names of states
+	// from the criteria (in case some are disjoint)
 	this.stateListFromCrit = function(crit_obj){
 		var output = [];
 		for (var s in crit_obj) {
@@ -205,6 +219,7 @@ function SPGGrouper() {
 		return output;
 	}
 
+	// calculates "arr1 minus arr2" and output unique list
 	this.uniqueDiff = function(arr1,arr2) {
 		var output = arr1.filter(function(x) { return arr2.indexOf(x) < 0; });
 		var output2 = [];
@@ -218,6 +233,8 @@ function SPGGrouper() {
 		return output2;
 	}
 
+	// adds the remaining disjoint nodes(states and trans)
+	// to the bottom of the diagram
 	this.disjointNodes = function(net_obj, crit_obj, named) {
 		var commands = this.readCommand(net_obj);
 		var loose_t = this.uniqueDiff(this.transListFromNet(net_obj), this.transListFromEdge(commands));
@@ -238,11 +255,14 @@ function SPGGrouper() {
 	}
 }
 
+// creates 2 leaf nodes in series, named by a number each
 SPGGrouper.prototype.numPairToSeries = function (lhs,rhs)
 {
 	return new SPGSeriesNode(new SPGLeafNode(lhs), new SPGLeafNode(rhs));
 }
 
+// converts a adjacency matrix (undirected)
+// into a list of serial pairs
 SPGGrouper.prototype.mtxToSerList = function(mtx)
 {
 	var output = [];
@@ -261,6 +281,7 @@ SPGGrouper.prototype.mtxToSerList = function(mtx)
 	return output;
 }
 
+// counts the unique elements in a list
 SPGGrouper.prototype.uniqueCount = function(list)
 {
 	list.sort();
@@ -275,6 +296,7 @@ SPGGrouper.prototype.uniqueCount = function(list)
 	return count;
 }
 
+// iterates uniqueCount on a list, returning an int list
 SPGGrouper.prototype.uniqueCountInListOfList = function(list)
 {
 	var output = [];
@@ -282,6 +304,7 @@ SPGGrouper.prototype.uniqueCountInListOfList = function(list)
 	return output;
 }
 
+// counts unique neighbors for each node, returns an int list
 SPGGrouper.prototype.countUNodeOrders = function(serlist)
 {
 	var output = [];
@@ -297,6 +320,7 @@ SPGGrouper.prototype.countUNodeOrders = function(serlist)
 	return this.uniqueCountInListOfList(output);
 }
 
+// counts neighbors for each node, returns an int list
 SPGGrouper.prototype.countNodeOrders = function(serlist)
 {
 	var output = [];
@@ -312,6 +336,7 @@ SPGGrouper.prototype.countNodeOrders = function(serlist)
 	return output;
 }
 
+// Combines 2 serial nodes into a single serial node (concatenation)
 SPGGrouper.prototype.mergeSerNodes = function(lhs, rhs)
 {
 	var output;
@@ -365,6 +390,8 @@ SPGGrouper.prototype.elim2OrderNode = function(idx, serlist)
 	return output;
 }
 
+//locates a single node with 2 unique neighbors,
+// and merges into a serial node there
 SPGGrouper.prototype.findAndRemove2ndOrderNode = function(serlist)
 {
 	var counts = this.countNodeOrders(serlist);
@@ -375,6 +402,7 @@ SPGGrouper.prototype.findAndRemove2ndOrderNode = function(serlist)
 	return this.elim2OrderNode(idx, serlist);
 }
 
+// iterates findAndRemove2ndOrderNode until it is ineffective
 SPGGrouper.prototype.removeAll2ndOrder = function(serlist)
 {
 	var oldlength = serlist.length + 1;
@@ -388,6 +416,8 @@ SPGGrouper.prototype.removeAll2ndOrder = function(serlist)
 	return serlist;
 }
 
+// alphabetizes the serlist
+// (looking only at first and last node in each serial node)
 SPGGrouper.prototype.normalizeAndSortSerList = function(serlist)
 {
 	for (var i = 0; i < serlist.length; i++)
@@ -404,6 +434,7 @@ SPGGrouper.prototype.normalizeAndSortSerList = function(serlist)
 		});
 }
 
+// finds serial nodes in parallel and creates a parallel node
 SPGGrouper.prototype.findAndMergePar = function(serlist)
 {
 	var lhs, rhs;
@@ -440,6 +471,7 @@ SPGGrouper.prototype.findAndMergePar = function(serlist)
 	return output;
 }
 
+// iterates findAndMergePar until it is ineffective
 SPGGrouper.prototype.mergeAllPar = function(serlist)
 {
 	var oldlength = serlist.length + 1;
@@ -453,6 +485,7 @@ SPGGrouper.prototype.mergeAllPar = function(serlist)
 	return serlist;
 }
 
+// finds the number of leaf nodes on each node, returns int list
 SPGGrouper.prototype.countLeaves = function(counts, serlist)
 {
 	var output = [];
@@ -467,6 +500,7 @@ SPGGrouper.prototype.countLeaves = function(counts, serlist)
 	return output;
 }
 
+// finds an element in a int list (idx) with at least 1
 SPGGrouper.prototype.findNodeWithLeaves = function(lcount)
 {
 	var found = -1;
@@ -477,6 +511,7 @@ SPGGrouper.prototype.findNodeWithLeaves = function(lcount)
 	return found;
 }
 
+// generates a list of leaves on a given node
 SPGGrouper.prototype.leavesOn = function(node, counts, serlist)
 {
 	var output = [];
@@ -490,6 +525,7 @@ SPGGrouper.prototype.leavesOn = function(node, counts, serlist)
 
 	return output;
 }
+
 
 SPGGrouper.prototype.removeMaxHeight = function(leaves, serlist)
 {
@@ -520,6 +556,8 @@ SPGGrouper.prototype.splitSerList = function(leaves, serlist)
 	return output;
 }
 
+// creates a dummy node for the outside, and merges leaves
+// as if they were parallel
 SPGGrouper.prototype.mergeLeafs = function(found, newid, list)
 {
 	var output = new SPGSeriesNode();
@@ -540,6 +578,7 @@ SPGGrouper.prototype.mergeLeafs = function(found, newid, list)
 	return output;
 }
 
+// finds the highest node id in a list of serial nodes
 SPGGrouper.prototype.maxNodeId = function(serlist)
 {
 	var output = 0;
@@ -551,6 +590,8 @@ SPGGrouper.prototype.maxNodeId = function(serlist)
 	return output;
 }
 
+// groups leaves into partitions based on the node they
+// are attached too
 SPGGrouper.prototype.classifyLeaves = function(serlist)
 {
 	var counts = this.countNodeOrders(serlist);
@@ -566,6 +607,7 @@ SPGGrouper.prototype.classifyLeaves = function(serlist)
 	return output;
 }
 
+// iterates classifyLeaves until it is no longer effective
 SPGGrouper.prototype.mergeAllLeaf = function(serlist)
 {
 	var oldlength = serlist.length + 1;
@@ -579,6 +621,8 @@ SPGGrouper.prototype.mergeAllLeaf = function(serlist)
 	return serlist;
 }
 
+// lone leaf is treated as parallel to a dummy node in a
+// arbitrary edge
 SPGGrouper.prototype.foldOverLoneLeaf = function(found, leaf, ser)
 {
 	if (leaf.first() != found) { leaf = leaf.reverse(); }
@@ -595,6 +639,7 @@ SPGGrouper.prototype.foldOverLoneLeaf = function(found, leaf, ser)
 
 	return output;
 }
+
 
 SPGGrouper.prototype.classifyLoneLeaves = function(serlist)
 {
@@ -652,6 +697,7 @@ SPGGrouper.prototype.intifyArray = function(arr)
 	return output;
 }
 
+// order function for io triples (to be used with built in sorting)
 SPGGrouper.prototype.ioTripleSort = function(a,b) {
 	if (a[0] < b[0] || (a[0]==b[0] &&  a[1] < b[1])) { return -1; }
 	else if (a[0]==b[0] && a[1]==b[1]) { return 0; }
@@ -821,7 +867,8 @@ SPGGrouper.prototype.withNameAndType = function(xy, postparse)
 	return output;
 }
 
-
+// class for converting the serial parallel graphs above
+// into petri style diagrams
 function petriSVGfact()
 {
 	this.radius = 10.0;
