@@ -1,5 +1,6 @@
 
-
+// Class to act as a wrapper for the HTML5 canvas
+// abstracts scaling and graph drawing details
 function canvasWriter(canvas) {
 	this.canvas = canvas;
 	this.border = 10.0;
@@ -14,11 +15,13 @@ function canvasWriter(canvas) {
 	this.last_cursors = [];
 	this.colors = {};
 
+	// blanks-out canvas (white)
 	this.reset = function() {
 		this.last_cursors = [];
 		this.canvas.getContext('2d').clearRect(0, 0, this.canvas.width, this.canvas.height);
 	}
 
+	// for each table in a list of tables, draws each curve if its color is defined.
 	this.drawCurves = function (table, colors) {
 		this.colors = colors;
 		for (color in colors){
@@ -31,6 +34,8 @@ function canvasWriter(canvas) {
 		}
 	}
 
+	// finds an appropriate scale for the diagram,
+	// depending on the size of the input
 	this.setSizeBasedOnDataSet = function(list, idx, count) {
 		this.data_y_low = -1;
 		this.data_y_high = 1;
@@ -48,10 +53,12 @@ function canvasWriter(canvas) {
 		this.drawAxis();
 	}
 
+	// remembers the last position of a curve in a diagram
 	this.addCursor = function(state, level, color) {
 		this.last_cursors.push({"state":state, "level":level, "color":color, "time":0});
 	}
 
+	// draws one "step" for a single curve
 	this.drawFromCursor = function(state, level) {
 		for (var i = 0; i < this.last_cursors.length; i++) {
 			var last = this.last_cursors[i];
@@ -67,12 +74,14 @@ function canvasWriter(canvas) {
 		}
 	}
 
+	// a circle to indicate the optimization criteria
 	this.drawTarget = function(time, quant, color) {
 		var c = "blue";
 		if (this.colors[color]) { c = this.colors[color]; }
 		this.drawCircle(this.scaleX(time), this.scaleY(quant), 3, c);
 	}
 
+	// direct canvas interaction, creates a circle
 	this.drawCircle = function(x,y,r,color) {
 		var context = this.canvas.getContext('2d');
 
@@ -85,6 +94,7 @@ function canvasWriter(canvas) {
 		context.stroke();
 	}
 
+	// direct canvas interaction, creates a line
 	this.drawLine = function(x1,y1,x2,y2,color,width) {
 		var context = this.canvas.getContext('2d');
 
@@ -96,6 +106,7 @@ function canvasWriter(canvas) {
 		context.stroke();
 	}
 
+	// fixes the scale for multiple diagrams on a single canvas
 	this.resetScale = function(count) {
 		this.scaleh = this.width/(this.data_x_high - this.data_x_low);
 		this.scalev = ((this.height + 2 * this.border)/count
@@ -103,14 +114,17 @@ function canvasWriter(canvas) {
 			/(this.data_y_high - this.data_y_low);
 	}
 
+	// stretches and translates a single point horizontally
 	this.scaleX = function(x) {
 		return (x - this.data_x_low)*this.scaleh + this.border;
 	}
 
+	// stretches and translates a single point vertically
 	this.scaleY = function(y) {
 		return this.height - (y - this.data_y_low)*this.scalev + this.border + this.vert_offs;
 	}
 
+	// draws 2 black lines, the x and y axis of the graph
 	this.drawAxis = function() {
 		this.drawLine(this.scaleX(0.0),
 				this.scaleY(this.data_y_low),
@@ -124,6 +138,7 @@ function canvasWriter(canvas) {
 				"black", 1.0);
 	}
 
+	// draws entire graph set from a list of tables
 	this.loadTable = function(table, color_obj, crit_obj){
 		if (table.length != crit_obj.length) {
 			throw("Table("+table.length+") to Criteria("+crit_obj.length+") mismatch.");
