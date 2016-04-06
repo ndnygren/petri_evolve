@@ -1,11 +1,47 @@
 [
 	{
-		"rate": 4.9028088653306704e-11,
-		"name": "auto2042",
+		"rate": 1.6308363813404523e-13,
+		"name": "auto681",
+		"input": [
+			"rabbit",
+			"grass",
+			"grass",
+			"rabbit"
+		],
+		"output": [
+			"rabbit",
+			"grass"
+		]
+	},
+	{
+		"rate": 0.047115863176147715,
+		"name": "auto10541",
+		"input": [
+			"grass"
+		],
+		"output": [
+			"grass",
+			"grass"
+		]
+	},
+	{
+		"rate": 0.000007214388594880475,
+		"name": "auto40968",
 		"input": [
 			"grass",
-			"grass",
-			"grass",
+			"rabbit",
+			"grass"
+		],
+		"output": [
+			"rabbit",
+			"rabbit",
+			"grass"
+		]
+	},
+	{
+		"rate": 0.000019206903343620154,
+		"name": "auto84364",
+		"input": [
 			"rabbit",
 			"grass"
 		],
@@ -14,64 +50,93 @@
 		]
 	},
 	{
-		"rate": 0.020825629442807015,
-		"name": "auto4131",
-		"input": [
-			"rabbit",
-			"rabbit"
-		],
+		"rate": 1.1729712367400315e-8,
+		"name": "auto115472",
+		"input": [],
 		"output": [
-			"rabbit"
-		]
-	},
-	{
-		"rate": 0.05011037603885782,
-		"name": "auto5944",
-		"input": [
+			"grass",
 			"grass"
-		],
-		"output": [
-			"grass",
-			"rabbit",
-			"grass",
-			"rabbit"
 		]
 	},
 	{
-		"rate": 3.990874069604391e-15,
-		"name": "auto6662",
+		"rate": 3.1989163033758474e-12,
+		"name": "auto123174",
 		"input": [],
 		"output": []
 	},
 	{
-		"rate": 0.0028988551608824437,
-		"name": "auto10011",
+		"rate": 1.411871007586664e-9,
+		"name": "auto130171",
 		"input": [
+			"rabbit"
+		],
+		"output": [
+			"rabbit",
+			"rabbit"
+		]
+	},
+	{
+		"rate": 0.004444896593463386,
+		"name": "auto139829",
+		"input": [
+			"rabbit",
+			"rabbit"
+		],
+		"output": []
+	},
+	{
+		"rate": 8.77192373036216e-11,
+		"name": "auto143086",
+		"input": [
+			"rabbit",
 			"grass"
 		],
 		"output": []
 	},
 	{
-		"rate": 7.743403804862381e-7,
-		"name": "auto30915",
+		"rate": 5.140528492859834e-10,
+		"name": "auto146353",
 		"input": [
-			"grass",
-			"rabbit"
+			"rabbit",
+			"grass"
 		],
 		"output": [
 			"rabbit"
 		]
 	},
 	{
-		"rate": 0.000451418690094459,
-		"name": "auto40755",
+		"rate": 9.599561926277732e-7,
+		"name": "auto153483",
 		"input": [
-			"rabbit",
-			"grass"
-		],
-		"output": [
 			"grass",
 			"rabbit"
+		],
+		"output": []
+	},
+	{
+		"rate": 0.000001555411075659545,
+		"name": "auto179015",
+		"input": [],
+		"output": [
+			"grass"
 		]
+	},
+	{
+		"rate": 0.0000010405870037067135,
+		"name": "auto284145",
+		"input": [],
+		"output": [
+			"grass",
+			"grass"
+		]
+	},
+	{
+		"name": "auto299886",
+		"rate": 0.00012328227425775477,
+		"input": [
+			"grass",
+			"rabbit"
+		],
+		"output": []
 	}
 ]
