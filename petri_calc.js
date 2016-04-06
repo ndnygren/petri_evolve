@@ -77,6 +77,8 @@ function calcVectTable(init_vect, net_obj, steps) {
 	return output;
 }
 
+// Search though the constraints and find a list of
+// populations which do not have mention in "initial"
 function findAllImplied(crit_obj) {
 	var output = {};
 	for (var j in crit_obj) {
@@ -115,6 +117,8 @@ function fillInitVect(net, init_vect) {
 	return output;
 }
 
+// Class containing the structure of the mutate-evaluate loop
+// for the genetic algorithm
 function petriEvolve(crit_obj, net_obj) {
 	this.crit_obj = crit_obj;
 	this.ls = [];
@@ -125,6 +129,7 @@ function petriEvolve(crit_obj, net_obj) {
 	this.tinc = 0;
 	this.log = [];
 
+	// populating species to zero where implied to exist
 	var implied = findAllImplied(crit_obj);
 
 	for (var x in crit_obj) {
@@ -136,6 +141,7 @@ function petriEvolve(crit_obj, net_obj) {
 		}
 	}
 
+	// calculates a list of tables, one table per initial state scenario
 	this.calcTable = function(net) {
 		var steps = 0;
 		var output = [];
@@ -151,6 +157,7 @@ function petriEvolve(crit_obj, net_obj) {
 		return output;
 	}
 
+	// generates tables and stores evaluations for each individual
 	this.makeEvalCache = function() {
 		var temp;
 		for (var x in this.ls) {
@@ -159,6 +166,7 @@ function petriEvolve(crit_obj, net_obj) {
 		}
 	}
 
+	// getter function for individual fitness scores
 	this.eval = function(idx) {
 		if (idx < 0 || idx >= this.ls.length) {
 			throw("Index out of range ("+idx+" of " + this.ls.length + ").");
@@ -166,6 +174,7 @@ function petriEvolve(crit_obj, net_obj) {
 		return this.ls[idx].score;
 	}
 
+	// getter function for individual tables (for illustration)
 	this.table = function(idx){
 		if (idx < 0 || idx >= this.ls.length) {
 			throw("Index out of range ("+idx+" of " + this.ls.length + ").");
@@ -173,10 +182,12 @@ function petriEvolve(crit_obj, net_obj) {
 		return this.ls[idx].table;
 	}
 
+	// getter for the table of the best individual
 	this.bestTable = function() {
 		return this.best_net.table;
 	}
 
+	// compares each table against the evaluation criteria, calculates MSE
 	this.evalTable = function(table) {
 		var error = 0;
 		var diff = 0;
@@ -193,7 +204,7 @@ function petriEvolve(crit_obj, net_obj) {
 
 		return error;
 }
-
+	// deep copy for transitions
 	this.copyTransition = function(t) {
 		var output = {};
 		output.rate = t.rate;
@@ -210,11 +221,13 @@ function petriEvolve(crit_obj, net_obj) {
 		return output;
 	}
 
+	// deep-copy for petri-nets
 	this.copyNet = function(net_obj) {
 		var ev = this;
 		return net_obj.map(function(x) { return ev.copyTransition(x); });
 	}
 
+	// generates a list of the explicit states.
 	this.stateList = function() {
 		var output = [];
 		for (var i in crit_obj[0].initial) {
@@ -223,12 +236,14 @@ function petriEvolve(crit_obj, net_obj) {
 		return output;
 	}
 
+	// generates a random state (for adding edges)
 	this.randomState = function() {
 		if (crit_obj.length == 0) { return "new_state"; }
 		var states = this.stateList();
 		return states[Math.floor(states.length * Math.random()) ];
 	}
 
+	// adds or removes an edge from a petri net
 	this.mutateNetEdge = function(net_obj) {
 		var output = [];
 		var marked = Math.floor(Math.random()*net_obj.length);
@@ -254,6 +269,7 @@ function petriEvolve(crit_obj, net_obj) {
 		return output;
 	}
 
+	// generates a random transition.
 	this.randomTrans = function() {
 		this.tinc++;
 		var output = {"name": "auto"+this.tinc, "rate":0.0001*Math.random(), input:[], output: []};
@@ -270,6 +286,7 @@ function petriEvolve(crit_obj, net_obj) {
 		return output;
 	}
 
+	// randomly adds or removes an edge.
 	this.mutateNetTrans = function(net_obj) {
 		var output = [];
 		var temp;
@@ -287,6 +304,7 @@ function petriEvolve(crit_obj, net_obj) {
 		return output;
 	}
 
+	// randomly shifts some edge weights, up or down
 	this.mutateNetRates = function(net_obj) {
 		var freq = this.freq;
 		var intensity = this.intensity;
@@ -304,6 +322,7 @@ function petriEvolve(crit_obj, net_obj) {
 		return output;
 	}
 
+	// calculates and returns the best individual in the current population
 	this.bestInSet = function() {
 		var b_so_far = this.best_net.score;
 		for (var x in this.ls) {
@@ -317,6 +336,7 @@ function petriEvolve(crit_obj, net_obj) {
 		return this.best_net;
 	}
 
+	// recalculates the table and score for a individual (for debugging)
 	this.assertTriple = function(obj) {
 		var table = this.calcTable(obj.net);
 		if (obj.score != this.evalTable(table)) {
@@ -324,10 +344,14 @@ function petriEvolve(crit_obj, net_obj) {
 		}
 	}
 
+	// normalizes fitness for roulette wheel
 	this.invertScore = function(input) {
 		return 1.0/Math.max(input, 0.0025);
 	}
 
+	// calculates a roulette wheel and uses it to do
+	// weighted random selection.
+	// generates whole population, not only individuals.
 	this.rouletteMess = function(lambda) {
 		var cummu = [0.0];
 		var output = [];
@@ -362,6 +386,7 @@ function petriEvolve(crit_obj, net_obj) {
 		return output;
 	}
 
+	// Generates a populations, then mutates it according to parameters
 	this.makeLambdaSet = function(lambda) {
 		var output = [];
 		var temp;
@@ -382,6 +407,7 @@ function petriEvolve(crit_obj, net_obj) {
 		return output;
 	}
 
+	// initializes best_net with unmodified initial input
 	this.best_net = {"net":net_obj, "table":this.calcTable(net_obj), "score":this.evalTable(this.calcTable(net_obj))};
 }
 
